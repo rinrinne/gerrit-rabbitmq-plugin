@@ -39,6 +39,7 @@ public class AMQPSession {
 
   public void connect() {
     ConnectionFactory factory = new ConnectionFactory();
+    exchangeName = UUID.randomUUID().toString();
     try {
       if (StringUtils.isNotEmpty(properties.getAMQPUri())) {
         factory.setUri(properties.getAMQPUri());
@@ -49,8 +50,17 @@ public class AMQPSession {
           factory.setPassword(properties.getAMQPPassword());
         }
         connection = factory.newConnection();
+      }
+      bind();
+    } catch (Exception ex) {
+      LOGGER.warn("#connect: " + ex.toString());
+    }
+  }
+
+  private void bind() {
+    if (connection != null && publishChannel == null) {
+      try {
         Channel ch = connection.createChannel();
-        exchangeName = UUID.randomUUID().toString();
         if (StringUtils.isNotEmpty(properties.getAMQPQueue())) {
           String exchangeType = EXCHANGE_TYPE_DIRECT;;
           String routingKey = properties.getAMQPRoutingKey();
@@ -69,24 +79,24 @@ public class AMQPSession {
             publishChannel = ch;
           }
         }
+      } catch (Exception ex) {
+        LOGGER.warn("#bind: " + ex.toString());
+        disconnect();
       }
-    } catch (Exception ex) {
-      LOGGER.warn("#connect: " + ex.toString());
     }
   }
 
   public void disconnect() {
-    if (connection != null) {
-      try {
-        publishChannel.close();
+    try {
+      if (connection != null) {
         connection.close();
-      } catch (Exception ex) {
-        LOGGER.warn("#disconnect: " + ex.toString());
-        ex.printStackTrace();
-      } finally {
-        connection = null;
-        publishChannel = null;
       }
+    } catch (Exception ex) {
+      LOGGER.warn("#disconnect: " + ex.toString());
+      ex.printStackTrace();
+    } finally {
+      connection = null;
+      publishChannel = null;
     }
   }
 
