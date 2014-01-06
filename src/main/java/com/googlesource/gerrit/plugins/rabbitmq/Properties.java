@@ -23,6 +23,11 @@ public class Properties {
   private final static String GERRIT = "gerrit";
   private final static String CONTENT_TYPE_JSON = "application/json";
 
+  private final static int DEFAULT_MESSAGE_DELIVERY_MODE = 1;
+  private final static int DEFAULT_MESSAGE_PRIORITY = 1;
+  private final static int DEFAULT_GERRIT_PORT = 29418;
+  private final static String DEFAULT_GERRIT_SCHEME = "ssh";
+
   private final Config config;
   private final PluginConfig pluginConfig;
   private AMQP.BasicProperties properties;
@@ -35,46 +40,70 @@ public class Properties {
   }
 
   public String getAMQPUri() {
-    return StringUtils.stripToEmpty(pluginConfig.getString(Keys.AMQP_URI.property));
+    return pluginConfig.getString(Keys.AMQP_URI.property, "");
   }
 
   public String getAMQPUsername() {
-    return StringUtils.stripToEmpty(pluginConfig.getString(Keys.AMQP_USERNAME.property));
+    return pluginConfig.getString(Keys.AMQP_USERNAME.property, "");
   }
 
   public String getAMQPPassword() {
-    return StringUtils.stripToEmpty(pluginConfig.getString(Keys.AMQP_PASSWORD.property));
+    return pluginConfig.getString(Keys.AMQP_PASSWORD.property, "");
   }
 
   public String getAMQPQueue() {
-    return StringUtils.stripToEmpty(pluginConfig.getString(Keys.AMQP_QUEUE.property));
+    return pluginConfig.getString(Keys.AMQP_QUEUE.property, "");
   }
 
   public String getAMQPExchange() {
-    return StringUtils.stripToEmpty(pluginConfig.getString(Keys.AMQP_EXCHANGE.property));
+    return pluginConfig.getString(Keys.AMQP_EXCHANGE.property, "");
   }
 
   public String getAMQPRoutingKey() {
-    return StringUtils.stripToEmpty(pluginConfig.getString(Keys.AMQP_ROUTINGKEY.property));
+    return pluginConfig.getString(Keys.AMQP_ROUTINGKEY.property, "");
+  }
+
+  public int getMessageDeliveryMode() {
+    return pluginConfig.getInt(Keys.MESSAGE_DELIVERY_MODE.property, DEFAULT_MESSAGE_DELIVERY_MODE);
+  }
+
+  public int getMessagePriority() {
+    return pluginConfig.getInt(Keys.MESSAGE_PRIORITY.property, DEFAULT_MESSAGE_PRIORITY);
+  }
+
+  public String getGerritName() {
+    return pluginConfig.getString(Keys.GERRIT_NAME.property, "");
+  }
+
+  public String getGerritHostname() {
+    return pluginConfig.getString(Keys.GERRIT_HOSTNAME.property, "");
+  }
+
+  public String getGerritScheme() {
+    return pluginConfig.getString(Keys.GERRIT_SCHEME.property, DEFAULT_GERRIT_SCHEME);
+  }
+
+  public int getGerritPort() {
+    return pluginConfig.getInt(Keys.GERRIT_PORT.property, DEFAULT_GERRIT_PORT);
+  }
+
+  public String getGerritFrontUrl() {
+    return StringUtils.stripToEmpty(config.getString(GERRIT, null, Keys.GERRIT_FRONT_URL.property));
+  }
+
+  public String getGerritVersion() {
+    return StringUtils.stripToEmpty(Version.getVersion());
   }
 
   public AMQP.BasicProperties getBasicProperties() {
     if (properties == null) {
       Map<String, Object> headers = new HashMap<String, Object>();
-      headers.put(Keys.GERRIT_NAME.header,
-          StringUtils.stripToEmpty(pluginConfig.getString(Keys.GERRIT_NAME.property)));
-      headers.put(Keys.GERRIT_HOSTNAME.header,
-          StringUtils.stripToEmpty(pluginConfig.getString(Keys.GERRIT_HOSTNAME.property)));
-      headers.put(Keys.GERRIT_SCHEME.header,
-          StringUtils.stripToEmpty(pluginConfig.getString(Keys.GERRIT_SCHEME.property)));
-      headers.put(Keys.GERRIT_PORT.header,
-          StringUtils.stripToEmpty(pluginConfig.getString(Keys.GERRIT_PORT.property)));
-      headers.put(Keys.GERRIT_PORT.header,
-          StringUtils.stripToEmpty(pluginConfig.getString(Keys.GERRIT_PORT.property)));
-      headers.put(Keys.GERRIT_FRONT_URL.header,
-          StringUtils.stripToEmpty(config.getString(GERRIT, null, Keys.GERRIT_FRONT_URL.property)));
-      headers.put(Keys.GERRIT_VERSION.header,
-          StringUtils.stripToEmpty(Version.getVersion()));
+      headers.put(Keys.GERRIT_NAME.header, getGerritName());
+      headers.put(Keys.GERRIT_HOSTNAME.header, getGerritHostname());
+      headers.put(Keys.GERRIT_SCHEME.header, getGerritScheme());
+      headers.put(Keys.GERRIT_PORT.header, String.valueOf(getGerritPort()));
+      headers.put(Keys.GERRIT_FRONT_URL.header, getGerritFrontUrl());
+      headers.put(Keys.GERRIT_VERSION.header, getGerritVersion());
 
       AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
       builder.appId(GERRIT);

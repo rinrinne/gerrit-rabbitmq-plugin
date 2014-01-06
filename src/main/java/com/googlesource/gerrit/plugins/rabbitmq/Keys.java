@@ -7,11 +7,13 @@ public enum Keys {
   AMQP_QUEUE("amqpQueue", null),
   AMQP_EXCHANGE("amqpExchange", null),
   AMQP_ROUTINGKEY("amqpRoutingKey", null),
-  GERRIT_NAME("name", "gerrit-name"),
-  GERRIT_HOSTNAME("sshHostname", "gerrit-host"),
+  MESSAGE_DELIVERY_MODE("messageDeliveryMode", null),
+  MESSAGE_PRIORITY("messagePriority", null),
+  GERRIT_NAME("gerritName", "gerrit-name"),
+  GERRIT_HOSTNAME("gerritSshHostname", "gerrit-host"),
   GERRIT_SCHEME(null, "gerrit-scheme"),
-  GERRIT_PORT("sshPort", "gerrit-port"),
-  GERRIT_FRONT_URL("canonicalWebUrl", "gerrit-front-url"),
+  GERRIT_PORT("gerritSshPort", "gerrit-port"),
+  GERRIT_FRONT_URL("gerritCanonicalWebUrl", "gerrit-front-url"),
   GERRIT_VERSION(null, "gerrit-version");
 
   public String property;
