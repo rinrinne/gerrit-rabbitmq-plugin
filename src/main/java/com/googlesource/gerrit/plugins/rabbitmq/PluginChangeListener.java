@@ -14,6 +14,8 @@ import java.util.Timer;
 public class PluginChangeListener implements ChangeListener, LifecycleListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PluginChangeListener.class);
+  private final static int MONITOR_FIRATTIME_DELAY = 15000;
+  private final Properties properties;
   private final AMQPSession.Factory factory;
   private AMQPSession session;
   private final Gson gson = new Gson();
@@ -21,7 +23,8 @@ public class PluginChangeListener implements ChangeListener, LifecycleListener {
   private final ConnectionMonitorTask monitorTask;
 
   @Inject
-  public PluginChangeListener(AMQPSession.Factory factory, ConnectionMonitorTask monitorTask) {
+  public PluginChangeListener(Properties properties, AMQPSession.Factory factory, ConnectionMonitorTask monitorTask) {
+    this.properties = properties;
     this.factory = factory;
     this.monitorTask = monitorTask;
   }
@@ -30,7 +33,7 @@ public class PluginChangeListener implements ChangeListener, LifecycleListener {
   public void start() {
     session = factory.create();
     session.connect();
-    monitorTimer.schedule(monitorTask, 15000, 15000);
+    monitorTimer.schedule(monitorTask, MONITOR_FIRATTIME_DELAY, properties.getConnectionMonitorInterval());
   }
 
   @Override

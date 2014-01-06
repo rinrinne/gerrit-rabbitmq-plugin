@@ -27,6 +27,8 @@ public class Properties {
   private final static int DEFAULT_MESSAGE_PRIORITY = 1;
   private final static int DEFAULT_GERRIT_PORT = 29418;
   private final static String DEFAULT_GERRIT_SCHEME = "ssh";
+  private final static int DEFAULT_CONNECTION_MONITOR_INTERVAL = 15000;
+  private final static int MINIMUM_CONNECTION_MONITOR_INTERVAL = 5000;
 
   private final Config config;
   private final PluginConfig pluginConfig;
@@ -93,6 +95,14 @@ public class Properties {
 
   public String getGerritVersion() {
     return StringUtils.stripToEmpty(Version.getVersion());
+  }
+
+  public int getConnectionMonitorInterval() {
+    int interval = pluginConfig.getInt(Keys.CONNECTION_MONITOR_INTERVAL.property, DEFAULT_CONNECTION_MONITOR_INTERVAL);
+    if (interval < MINIMUM_CONNECTION_MONITOR_INTERVAL) {
+      return MINIMUM_CONNECTION_MONITOR_INTERVAL;
+    }
+    return interval;
   }
 
   public AMQP.BasicProperties getBasicProperties() {

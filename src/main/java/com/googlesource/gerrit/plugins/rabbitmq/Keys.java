@@ -14,7 +14,8 @@ public enum Keys {
   GERRIT_SCHEME(null, "gerrit-scheme"),
   GERRIT_PORT("gerritSshPort", "gerrit-port"),
   GERRIT_FRONT_URL("gerritCanonicalWebUrl", "gerrit-front-url"),
-  GERRIT_VERSION(null, "gerrit-version");
+  GERRIT_VERSION(null, "gerrit-version"),
+  CONNECTION_MONITOR_INTERVAL("monitorInterval", null);
 
   public String property;
   public String header;
