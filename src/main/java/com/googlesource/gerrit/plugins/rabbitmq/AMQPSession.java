@@ -20,6 +20,7 @@ public class AMQPSession {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQPSession.class);
   private static final String EXCHANGE_TYPE_DIRECT ="direct";
+  private static final String EXCHANGE_TYPE_FANOUT ="fanout";
   private final Properties properties;
   private final String pluginName;
   private Connection connection;
@@ -49,11 +50,17 @@ public class AMQPSession {
         }
         connection = factory.newConnection();
         Channel ch = connection.createChannel();
+        exchangeName = UUID.randomUUID().toString();
         if (StringUtils.isNotEmpty(properties.getAMQPQueue())) {
-          exchangeName = UUID.randomUUID().toString();
-          ch.exchangeDeclare(exchangeName, EXCHANGE_TYPE_DIRECT, true);
+          String exchangeType = EXCHANGE_TYPE_DIRECT;;
+          String routingKey = properties.getAMQPRoutingKey();
+          if (routingKey.isEmpty()) {
+            exchangeType = EXCHANGE_TYPE_FANOUT;
+            routingKey = pluginName;
+          }
+          ch.exchangeDeclare(exchangeName, exchangeType, true);
           ch.queueDeclare(properties.getAMQPQueue(), true, false, false, null);
-          ch.queueBind(properties.getAMQPQueue(), exchangeName, "com.sonymobile.plugin.demo");
+          ch.queueBind(properties.getAMQPQueue(), exchangeName, routingKey);
           publishChannel = ch;
         } else {
           exchangeName = properties.getAMQPExchange();
