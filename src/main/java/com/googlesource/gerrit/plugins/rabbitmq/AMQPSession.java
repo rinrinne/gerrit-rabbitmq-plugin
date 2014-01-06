@@ -37,6 +37,13 @@ public class AMQPSession {
     this.pluginName = pluginName;
   }
 
+  public boolean isOpen() {
+    if (connection != null) {
+      return true;
+    }
+    return false;
+  }
+
   public void connect() {
     ConnectionFactory factory = new ConnectionFactory();
     exchangeName = UUID.randomUUID().toString();
