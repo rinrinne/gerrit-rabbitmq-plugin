@@ -38,10 +38,10 @@ public class AMQPSession {
     try {
       if (StringUtils.isNotEmpty(properties.getAMQPUri())) {
         factory.setUri(properties.getAMQPUri());
-        if (!StringUtils.isEmpty(properties.getAMQPUsername())) {
+        if (StringUtils.isNotEmpty(properties.getAMQPUsername())) {
           factory.setUsername(properties.getAMQPUsername());
         }
-        if (!StringUtils.isEmpty(properties.getAMQPPassword())) {
+        if (StringUtils.isNotEmpty(properties.getAMQPPassword())) {
           factory.setPassword(properties.getAMQPPassword());
         }
         connection = factory.newConnection();
