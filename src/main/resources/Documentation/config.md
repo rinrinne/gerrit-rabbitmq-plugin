@@ -9,7 +9,8 @@ RabbitMQ Configuration
     amqpQueue = gerrit-queue
     amqpExchange = gerrit-exchange
     amqpRoutingKey = com.foobar.www.gerrit
-    name = foobar-gerrit
-    sshHostname = www.foobar.com
-    sshPort = 24918
+    gerritName = foobar-gerrit
+    gerritHostname = www.foobar.com
+    gerritPort = 24918
+    monitorInterval = 15000
 ```
