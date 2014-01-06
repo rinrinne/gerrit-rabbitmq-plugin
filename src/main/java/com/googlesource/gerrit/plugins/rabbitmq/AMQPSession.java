@@ -93,7 +93,8 @@ public class AMQPSession {
   public void sendMessage(String message) {
     if (publishChannel != null && publishChannel.isOpen()) {
       try {
-        publishChannel.basicPublish(exchangeName, properties.getAMQPRoutingKey(), null, message.getBytes(CharEncoding.UTF_8));
+        publishChannel.basicPublish(exchangeName, properties.getAMQPRoutingKey(), properties.getBasicProperties(),
+            message.getBytes(CharEncoding.UTF_8));
       } catch (Exception ex) {
         LOGGER.warn("#sendMessage: " + ex.toString());
       }
