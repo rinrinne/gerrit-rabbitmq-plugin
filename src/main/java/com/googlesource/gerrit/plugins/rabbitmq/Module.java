@@ -24,6 +24,7 @@ class Module extends AbstractModule {
   @Override
   protected void configure() {
     bind(AMQPSession.class);
+    bind(ConnectionMonitorTask.class);
     DynamicSet.bind(binder(), ChangeListener.class).to(PluginChangeListener.class);
     DynamicSet.bind(binder(), LifecycleListener.class).to(PluginChangeListener.class);
     install(new FactoryModuleBuilder().build(AMQPSession.Factory.class));
