@@ -1,5 +1,6 @@
 package com.googlesource.gerrit.plugins.rabbitmq;
 
+import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -20,6 +21,7 @@ public class AMQPSession {
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQPSession.class);
   private static final String EXCHANGE_TYPE_DIRECT ="direct";
   private final Properties properties;
+  private final String pluginName;
   private Connection connection;
   private Channel publishChannel;
   private String exchangeName;
@@ -29,8 +31,9 @@ public class AMQPSession {
   }
 
   @Inject
-  public AMQPSession(Properties properties) {
+  public AMQPSession(@PluginName String pluginName, Properties properties) {
     this.properties = properties;
+    this.pluginName = pluginName;
   }
 
   public void connect() {
