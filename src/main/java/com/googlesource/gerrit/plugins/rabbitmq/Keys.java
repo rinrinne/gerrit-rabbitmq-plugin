@@ -10,9 +10,9 @@ public enum Keys {
   MESSAGE_DELIVERY_MODE("messageDeliveryMode", null),
   MESSAGE_PRIORITY("messagePriority", null),
   GERRIT_NAME("gerritName", "gerrit-name"),
-  GERRIT_HOSTNAME("gerritSshHostname", "gerrit-host"),
-  GERRIT_SCHEME(null, "gerrit-scheme"),
-  GERRIT_PORT("gerritSshPort", "gerrit-port"),
+  GERRIT_HOSTNAME("gerritHostname", "gerrit-host"),
+  GERRIT_SCHEME("gerritScheme", "gerrit-scheme"),
+  GERRIT_PORT("gerritPort", "gerrit-port"),
   GERRIT_FRONT_URL("gerritCanonicalWebUrl", "gerrit-front-url"),
   GERRIT_VERSION(null, "gerrit-version"),
   CONNECTION_MONITOR_INTERVAL("monitorInterval", null);
