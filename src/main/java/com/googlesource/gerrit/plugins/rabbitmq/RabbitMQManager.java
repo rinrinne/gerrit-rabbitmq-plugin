@@ -16,22 +16,20 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQManager.class);
   private final static int MONITOR_FIRATTIME_DELAY = 15000;
   private final Properties properties;
-  private final AMQPSession.Factory factory;
-  private AMQPSession session;
+  private final AMQPSession session;
   private final Gson gson = new Gson();
   private final Timer monitorTimer = new Timer();
   private final ConnectionMonitorTask monitorTask;
 
   @Inject
-  public RabbitMQManager(Properties properties, AMQPSession.Factory factory, ConnectionMonitorTask monitorTask) {
+  public RabbitMQManager(Properties properties, AMQPSession session, ConnectionMonitorTask monitorTask) {
     this.properties = properties;
-    this.factory = factory;
+    this.session = session;
     this.monitorTask = monitorTask;
   }
 
   @Override
   public void start() {
-    session = factory.create();
     session.connect();
     monitorTimer.schedule(monitorTask, MONITOR_FIRATTIME_DELAY, properties.getConnectionMonitorInterval());
   }
@@ -39,10 +37,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
   @Override
   public void stop() {
     monitorTimer.cancel();
-    if (session != null) {
-      session.disconnect();
-    }
-    session = null;
+    session.disconnect();
   }
 
   @Override
