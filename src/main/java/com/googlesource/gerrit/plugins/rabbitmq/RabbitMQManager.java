@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Timer;
 
-public class PluginChangeListener implements ChangeListener, LifecycleListener {
+public class RabbitMQManager implements ChangeListener, LifecycleListener {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PluginChangeListener.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQManager.class);
   private final static int MONITOR_FIRATTIME_DELAY = 15000;
   private final Properties properties;
   private final AMQPSession.Factory factory;
@@ -23,7 +23,7 @@ public class PluginChangeListener implements ChangeListener, LifecycleListener {
   private final ConnectionMonitorTask monitorTask;
 
   @Inject
-  public PluginChangeListener(Properties properties, AMQPSession.Factory factory, ConnectionMonitorTask monitorTask) {
+  public RabbitMQManager(Properties properties, AMQPSession.Factory factory, ConnectionMonitorTask monitorTask) {
     this.properties = properties;
     this.factory = factory;
     this.monitorTask = monitorTask;
