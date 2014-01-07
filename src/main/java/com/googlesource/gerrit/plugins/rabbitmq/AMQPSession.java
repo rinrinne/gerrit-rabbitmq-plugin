@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.ShutdownListener;
+import com.rabbitmq.client.ShutdownSignalException;
 
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.lang.StringUtils;
@@ -16,7 +18,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-public class AMQPSession {
+public class AMQPSession implements ShutdownListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQPSession.class);
   private static final String EXCHANGE_TYPE_DIRECT ="direct";
@@ -54,6 +56,7 @@ public class AMQPSession {
           factory.setPassword(properties.getAMQPPassword());
         }
         connection = factory.newConnection();
+        connection.addShutdownListener(this);
         LOGGER.info("Connection established.");
       }
       bind();
@@ -116,7 +119,6 @@ public class AMQPSession {
       connection = null;
       publishChannel = null;
     }
-    LOGGER.info("Disconnected.");
   }
 
   public void sendMessage(String message) {
@@ -129,5 +131,10 @@ public class AMQPSession {
         LOGGER.warn("#sendMessage: " + ex.getClass().getName());
       }
     }
+  }
+
+  @Override
+  public void shutdownCompleted(ShutdownSignalException arg0) {
+    LOGGER.info("Disconnected.");
   }
 }
