@@ -117,6 +117,8 @@ public class Properties {
       builder.appId(GERRIT);
       builder.contentEncoding(CharEncoding.UTF_8);
       builder.contentType(CONTENT_TYPE_JSON);
+      builder.deliveryMode(getMessageDeliveryMode());
+      builder.priority(getMessagePriority());
       builder.headers(headers);
 
       properties = builder.build();
