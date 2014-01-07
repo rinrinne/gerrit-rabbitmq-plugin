@@ -115,7 +115,6 @@ public class AMQPSession implements ShutdownListener {
       }
     } catch (Exception ex) {
       LOGGER.warn("#disconnect: " + ex.getClass().getName());
-    } finally {
       connection = null;
       publishChannel = null;
     }
@@ -136,5 +135,7 @@ public class AMQPSession implements ShutdownListener {
   @Override
   public void shutdownCompleted(ShutdownSignalException arg0) {
     LOGGER.info("Disconnected.");
+    connection = null;
+    publishChannel = null;
   }
 }
