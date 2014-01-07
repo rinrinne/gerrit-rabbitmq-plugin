@@ -34,6 +34,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
       @Override
       public void run() {
         if (!session.isOpen()) {
+          LOGGER.info("#start: try to reconnect");
           session.connect();
         }
       }
