@@ -70,7 +70,6 @@ limitations under the License.
             <manifestEntries>
               <Gerrit-PluginName>rabbitmq</Gerrit-PluginName>
               <Gerrit-Module>com.googlesource.gerrit.plugins.rabbitmq.Module</Gerrit-Module>
-              <Gerrit-HttpModule>com.googlesource.gerrit.plugins.rabbitmq.HttpModule</Gerrit-HttpModule>
 
               <Implementation-Vendor>Gerrit Code Review</Implementation-Vendor>
               <Implementation-URL>http://code.google.com/p/gerrit/</Implementation-URL>
