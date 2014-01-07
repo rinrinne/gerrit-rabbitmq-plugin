@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 public class RabbitMQManager implements ChangeListener, LifecycleListener {
 
@@ -19,19 +20,24 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
   private final AMQPSession session;
   private final Gson gson = new Gson();
   private final Timer monitorTimer = new Timer();
-  private final ConnectionMonitorTask monitorTask;
 
   @Inject
-  public RabbitMQManager(Properties properties, AMQPSession session, ConnectionMonitorTask monitorTask) {
+  public RabbitMQManager(Properties properties, AMQPSession session) {
     this.properties = properties;
     this.session = session;
-    this.monitorTask = monitorTask;
   }
 
   @Override
   public void start() {
     session.connect();
-    monitorTimer.schedule(monitorTask, MONITOR_FIRATTIME_DELAY, properties.getConnectionMonitorInterval());
+    monitorTimer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        if (!session.isOpen()) {
+          session.connect();
+        }
+      }
+    }, MONITOR_FIRATTIME_DELAY, properties.getConnectionMonitorInterval());
   }
 
   @Override
