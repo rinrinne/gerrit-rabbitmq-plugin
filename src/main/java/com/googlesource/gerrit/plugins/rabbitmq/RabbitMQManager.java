@@ -15,7 +15,7 @@ import java.util.TimerTask;
 public class RabbitMQManager implements ChangeListener, LifecycleListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQManager.class);
-  private final static int MONITOR_FIRATTIME_DELAY = 15000;
+  private final static int MONITOR_FIRSTTIME_DELAY = 15000;
   private final Properties properties;
   private final AMQPSession session;
   private final Gson gson = new Gson();
@@ -37,7 +37,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
           session.connect();
         }
       }
-    }, MONITOR_FIRATTIME_DELAY, properties.getConnectionMonitorInterval());
+    }, MONITOR_FIRSTTIME_DELAY, properties.getConnectionMonitorInterval());
   }
 
   @Override
