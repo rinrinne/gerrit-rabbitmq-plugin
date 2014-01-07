@@ -24,9 +24,9 @@ class Module extends AbstractModule {
   @Override
   protected void configure() {
     bind(AMQPSession.class);
+    bind(Properties.class);
     bind(ConnectionMonitorTask.class);
     DynamicSet.bind(binder(), ChangeListener.class).to(RabbitMQManager.class);
     DynamicSet.bind(binder(), LifecycleListener.class).to(RabbitMQManager.class);
-    install(new FactoryModuleBuilder().build(AMQPSession.Factory.class));
   }
 }
