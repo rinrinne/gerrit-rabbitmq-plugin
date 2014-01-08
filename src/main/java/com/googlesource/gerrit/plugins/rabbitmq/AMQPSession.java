@@ -47,7 +47,6 @@ public class AMQPSession implements ShutdownListener {
   public void connect() {
     LOGGER.info("Connect to " + properties.getAMQPUri() + "...");
     ConnectionFactory factory = new ConnectionFactory();
-    exchangeName = UUID.randomUUID().toString();
     try {
       if (StringUtils.isNotEmpty(properties.getAMQPUri())) {
         factory.setUri(properties.getAMQPUri());
@@ -83,6 +82,7 @@ public class AMQPSession implements ShutdownListener {
             exchangeType = EXCHANGE_TYPE_FANOUT;
             routingKey = pluginName;
           }
+          exchangeName = UUID.randomUUID().toString();
           LOGGER.debug("Exchange type: " + exchangeType);
           LOGGER.debug("Declare exchange: " + exchangeName);
           ch.exchangeDeclare(exchangeName, exchangeType, true);
@@ -92,7 +92,7 @@ public class AMQPSession implements ShutdownListener {
           ch.queueBind(properties.getAMQPQueue(), exchangeName, routingKey);
           publishChannel = ch;
           LOGGER.info("Channel for queue \"" + properties.getAMQPQueue() + "\" opened.");
-        } else if (StringUtils.isNotEmpty(exchangeName)) {
+        } else if (StringUtils.isNotEmpty(properties.getAMQPExchange())) {
           LOGGER.info("Exchange mode");
           exchangeName = properties.getAMQPExchange();
           LOGGER.debug("Declare exchange: " + exchangeName);
