@@ -90,15 +90,16 @@ public class AMQPSession implements ShutdownListener {
           ch.queueBind(properties.getAMQPQueue(), exchangeName, routingKey);
           publishChannel = ch;
           LOGGER.info("Channel for queue \"" + properties.getAMQPQueue() + "\" opened.");
-        } else {
+        } else if (StringUtils.isNotEmpty(exchangeName)) {
           LOGGER.info("Exchange mode");
           exchangeName = properties.getAMQPExchange();
-          if (StringUtils.isNotEmpty(exchangeName)) {
-            LOGGER.debug("Declare exchange: " + exchangeName);
-            ch.exchangeDeclarePassive(exchangeName);
-            publishChannel = ch;
-            LOGGER.info("Channel for exchange \"" + exchangeName + "\" opened.");
-          }
+          LOGGER.debug("Declare exchange: " + exchangeName);
+          ch.exchangeDeclarePassive(exchangeName);
+          publishChannel = ch;
+          LOGGER.info("Channel for exchange \"" + exchangeName + "\" opened.");
+        } else {
+          LOGGER.warn("Unrecognized bind mode.");
+          throw new IOException();
         }
       } catch (Exception ex) {
         LOGGER.warn("#bind: " + ex.getClass().getName());
