@@ -21,7 +21,8 @@ Some parameters can be configured in the standard Gerrit config file `gerrit.con
 ```
 
 rabbitmq.amqpUri
-:   The URI of RabbitMQ server's endpoint. **this is mandatory**.
+:   The URI of RabbitMQ server's endpoint. If not specified,
+    defaults to "amqp://localhost".
 
 rabbitmq.amqpUsername
 :   Username for RabbitMQ connection authentication. If not

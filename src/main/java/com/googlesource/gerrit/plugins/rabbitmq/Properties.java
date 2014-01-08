@@ -40,7 +40,7 @@ public class Properties {
   }
 
   public String getAMQPUri() {
-    return pluginConfig.getString(Keys.AMQP_URI.property, "");
+    return pluginConfig.getString(Keys.AMQP_URI.property, "amqp://localhost");
   }
 
   public String getAMQPUsername() {
