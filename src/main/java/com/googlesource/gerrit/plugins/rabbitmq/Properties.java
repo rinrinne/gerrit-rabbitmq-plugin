@@ -3,8 +3,7 @@ package com.googlesource.gerrit.plugins.rabbitmq;
 import com.google.gerrit.common.Version;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.GerritServerConfig;
-import com.google.gerrit.server.config.PluginConfig;
-import com.google.gerrit.server.config.PluginConfigFactory;
+import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -12,14 +11,22 @@ import com.rabbitmq.client.AMQP;
 
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.storage.file.FileBasedConfig;
+import org.eclipse.jgit.util.FS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
 public class Properties {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
   private final static String GERRIT = "gerrit";
   private final static String CONTENT_TYPE_JSON = "application/json";
 
@@ -31,66 +38,105 @@ public class Properties {
   private final static int MINIMUM_CONNECTION_MONITOR_INTERVAL = 5000;
 
   private final Config config;
-  private final PluginConfig pluginConfig;
+  private final Config pluginConfig;
   private AMQP.BasicProperties properties;
 
   @Inject
-  public Properties(@PluginName String pluginName,
-      @GerritServerConfig final Config config, PluginConfigFactory factory) {
+  public Properties(@PluginName final String pluginName, final SitePaths site,
+      @GerritServerConfig final Config config) {
     this.config = config;
-    this.pluginConfig = factory.getFromGerritConfig(pluginName);
+    this.pluginConfig = getPluginConfig(new File(site.etc_dir, pluginName + ".config"));
+  }
+
+  public Config getPluginConfig(File cfgPath) {
+    LOGGER.info("Loading " + cfgPath.toString() + " ...");
+    FileBasedConfig cfg = new FileBasedConfig(cfgPath, FS.DETECTED);
+    if (!cfg.getFile().exists()) {
+      LOGGER.warn("No " + cfg.getFile());
+      return cfg;
+    }
+    if (cfg.getFile().length() == 0) {
+      LOGGER.info("Empty " + cfg.getFile());
+      return cfg;
+    }
+
+    try {
+      cfg.load();
+    } catch (ConfigInvalidException e) {
+      LOGGER.info("Config file " + cfg.getFile() + " is invalid: " + e.getMessage());
+    } catch (IOException e) {
+      LOGGER.info("Cannot read " + cfg.getFile() + ": " + e.getMessage());
+    }
+    return cfg;
+  }
+
+  private String getConfigString(Keys key, String defaultValue) {
+    String val = pluginConfig.getString(key.section, null, key.value);
+    if (val == null) {
+      return defaultValue;
+    } else {
+      return val;
+    }
+  }
+
+  private int getConfigInt(Keys key, int defaultValue) {
+    return pluginConfig.getInt(key.section, key.value, defaultValue);
+  }
+
+  private boolean getConfigBoolean(Keys key, boolean defaultValue) {
+    return pluginConfig.getBoolean(key.section, key.value, defaultValue);
   }
 
   public String getAMQPUri() {
-    return pluginConfig.getString(Keys.AMQP_URI.property, "amqp://localhost");
+    return getConfigString(Keys.AMQP_URI, "amqp://localhost");
   }
 
   public String getAMQPUsername() {
-    return pluginConfig.getString(Keys.AMQP_USERNAME.property, "");
+    return getConfigString(Keys.AMQP_USERNAME, "");
   }
 
   public String getAMQPPassword() {
-    return pluginConfig.getString(Keys.AMQP_PASSWORD.property, "");
+    return getConfigString(Keys.AMQP_PASSWORD, "");
   }
 
   public String getAMQPQueue() {
-    return pluginConfig.getString(Keys.AMQP_QUEUE.property, "");
+    return getConfigString(Keys.AMQP_QUEUE, "");
   }
 
   public String getAMQPExchange() {
-    return pluginConfig.getString(Keys.AMQP_EXCHANGE.property, "");
+    return getConfigString(Keys.AMQP_EXCHANGE, "");
   }
 
   public String getAMQPRoutingKey() {
-    return pluginConfig.getString(Keys.AMQP_ROUTINGKEY.property, "");
+    return getConfigString(Keys.AMQP_ROUTINGKEY, "");
   }
 
   public int getMessageDeliveryMode() {
-    return pluginConfig.getInt(Keys.MESSAGE_DELIVERY_MODE.property, DEFAULT_MESSAGE_DELIVERY_MODE);
+    return getConfigInt(Keys.MESSAGE_DELIVERY_MODE, DEFAULT_MESSAGE_DELIVERY_MODE);
   }
 
   public int getMessagePriority() {
-    return pluginConfig.getInt(Keys.MESSAGE_PRIORITY.property, DEFAULT_MESSAGE_PRIORITY);
+    return getConfigInt(Keys.MESSAGE_PRIORITY, DEFAULT_MESSAGE_PRIORITY);
   }
 
   public String getGerritName() {
-    return pluginConfig.getString(Keys.GERRIT_NAME.property, "");
+    return getConfigString(Keys.GERRIT_NAME, "");
   }
 
   public String getGerritHostname() {
-    return pluginConfig.getString(Keys.GERRIT_HOSTNAME.property, "");
+    return getConfigString(Keys.GERRIT_HOSTNAME, "");
   }
 
   public String getGerritScheme() {
-    return pluginConfig.getString(Keys.GERRIT_SCHEME.property, DEFAULT_GERRIT_SCHEME);
+    return getConfigString(Keys.GERRIT_SCHEME, DEFAULT_GERRIT_SCHEME);
   }
 
   public int getGerritPort() {
-    return pluginConfig.getInt(Keys.GERRIT_PORT.property, DEFAULT_GERRIT_PORT);
+    return getConfigInt(Keys.GERRIT_PORT, DEFAULT_GERRIT_PORT);
   }
 
   public String getGerritFrontUrl() {
-    return StringUtils.stripToEmpty(config.getString(GERRIT, null, Keys.GERRIT_FRONT_URL.property));
+    return StringUtils.stripToEmpty(config.getString(GERRIT, null, Keys.GERRIT_FRONT_URL.value));
   }
 
   public String getGerritVersion() {
@@ -98,7 +144,7 @@ public class Properties {
   }
 
   public int getConnectionMonitorInterval() {
-    int interval = pluginConfig.getInt(Keys.CONNECTION_MONITOR_INTERVAL.property, DEFAULT_CONNECTION_MONITOR_INTERVAL);
+    int interval = getConfigInt(Keys.CONNECTION_MONITOR_INTERVAL, DEFAULT_CONNECTION_MONITOR_INTERVAL);
     if (interval < MINIMUM_CONNECTION_MONITOR_INTERVAL) {
       return MINIMUM_CONNECTION_MONITOR_INTERVAL;
     }
