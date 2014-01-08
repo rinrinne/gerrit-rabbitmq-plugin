@@ -1,80 +1,83 @@
 RabbitMQ Configuration
 ======================
 
-Some parameters can be configured in the standard Gerrit config file `gerrit.config`.
+Some parameters can be configured in the plugin config file `rabbitmq.config`.
 
 ```
-  [plugin "rabbimq"]
-    amqpUri = amqp://www.foobar.com:5672
-    amqpUsername = guest
-    amqpPassword = guest
-    amqpQueue = gerrit-queue
-    amqpExchange = gerrit-exchange
-    amqpRoutingKey = com.foobar.www.gerrit
-    gerritName = foobar-gerrit
-    gerritHostname = www.foobar.com
-    gerritScheme = ssh
-    gerritPort = 24918
-    messageDeliveryMode = 1
-    messagePriority = 0
-    monitorInterval = 15000
+  [amqp]
+    uri = amqp://www.foobar.com:5672
+    username = guest
+    password = guest
+    queue = gerrit-queue
+    exchange = direct-gerrit-exchange
+    routingKey = com.foobar.www.gerrit
+  [gerrit]
+    name = foobar-gerrit
+    hostname = www.foobar.com
+    scheme = ssh
+    port = 24918
+  [message]
+    deliveryMode = 1
+    priority = 0
+  [monitor]
+    interval = 15000
 ```
 
-rabbitmq.amqpUri
+amqp.ri
 :   The URI of RabbitMQ server's endpoint. If not specified,
     defaults to "amqp://localhost".
 
-rabbitmq.amqpUsername
+amqp.username
 :   Username for RabbitMQ connection authentication. If not
     specified, defaults to "guest".
 
-rabbitmq.amqpPassword
+amqp.password
 :   Password for RabbitMQ connection authentication. If not
     specified, defaults to "guest".
 
-rabbitmq.amqpQueue
+amqp.queue
 :   The name of queue. If specified, this queue is declared to RabbitMQ.
     Also the unique exchange is declated with `direct` type (or `fanout`
-    type if `rabbitmq.amqpRoutingKey` is not specified). Then bind queue
+    type if `amqp.routingKey` is not specified). Then bind queue
     from this exchange.
     +
-    Note that `rabbitmq.amqpExchange` is ignored.
+    Note that `amqp.exchange` is ignored.
 
-rabbitmq.amqpExchange
-:   The name of exchange. This is used when `rabbitmq.amqpQueue` is not specified.
+amqp.exchange
+:   The name of exchange. This is used when `amqp.queue` is not specified.
     The named exchange is not created. It means that it would be failure
     if named exchange is not exist in RabbitMQ.
 
-rabbitmq.amqpRoutingKey
+amqp.routingKey
 :   The name of routing key. if not specified, defaults to the same as plugin name.
 
-rabbitmq.gerritName
+gerrit.mame
 :   The name of gerrit(not hostname). This is your given name to identify your gerrit.
     This can be used for message header only.
 
-rabbitmq.gerritHostname
+gerrit.hostname
 :   The hostname of gerrit for SCM connection.
     This can be used for message header only.
 
-rabbitmq.gerritScheme
+gerrit.scheme
 :   The scheme of gerrit for SCM connection.
     If not specified, defaults to "ssh".
     This can be used for message header only.
 
-rabbitmq.gerritPort
+gerrit.port
 :   The port number of gerrit for SCM connection.
     If not specified, defaults to 29418.
     This can be used for message header only.
 
-rabbitmq.messageDeliverMode
+message.deliverMode
 :   The delivery mode. if not specified, defaults to 1.
     * 1 - non-persistent
     * 2 - persistent
 
-rabbitmq.messagePriority
+message.priority
 :   The priority of message. if not specified, defaults to 0.
 
-rabbitmq.monitorInterval
+monitor.interval
 :   The interval time in milliseconds for connection monitor.
     If not specified, defaults to 15000.
     You can specify the value more than 5000.
