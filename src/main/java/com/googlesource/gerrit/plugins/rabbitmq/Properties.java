@@ -24,7 +24,7 @@ public class Properties {
   private final static String CONTENT_TYPE_JSON = "application/json";
 
   private final static int DEFAULT_MESSAGE_DELIVERY_MODE = 1;
-  private final static int DEFAULT_MESSAGE_PRIORITY = 1;
+  private final static int DEFAULT_MESSAGE_PRIORITY = 0;
   private final static int DEFAULT_GERRIT_PORT = 29418;
   private final static String DEFAULT_GERRIT_SCHEME = "ssh";
   private final static int DEFAULT_CONNECTION_MONITOR_INTERVAL = 15000;
