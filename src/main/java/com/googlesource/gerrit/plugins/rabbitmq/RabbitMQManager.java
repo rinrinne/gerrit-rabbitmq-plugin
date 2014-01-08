@@ -5,6 +5,7 @@ import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.gerrit.server.events.ChangeEvent;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Timer;
 import java.util.TimerTask;
 
+@Singleton
 public class RabbitMQManager implements ChangeListener, LifecycleListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQManager.class);

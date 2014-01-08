@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.rabbitmq;
 
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
+@Singleton
 public class AMQPSession implements ShutdownListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQPSession.class);

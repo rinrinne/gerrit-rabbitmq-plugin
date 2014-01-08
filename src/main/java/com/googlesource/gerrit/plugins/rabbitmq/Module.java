@@ -24,6 +24,7 @@ class Module extends AbstractModule {
   protected void configure() {
     bind(AMQPSession.class);
     bind(Properties.class);
+    bind(RabbitMQManager.class);
     DynamicSet.bind(binder(), ChangeListener.class).to(RabbitMQManager.class);
     DynamicSet.bind(binder(), LifecycleListener.class).to(RabbitMQManager.class);
   }

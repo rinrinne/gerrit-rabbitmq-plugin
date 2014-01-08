@@ -6,6 +6,7 @@ import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import com.rabbitmq.client.AMQP;
 
@@ -16,6 +17,7 @@ import org.eclipse.jgit.lib.Config;
 import java.util.HashMap;
 import java.util.Map;
 
+@Singleton
 public class Properties {
 
   private final static String GERRIT = "gerrit";
