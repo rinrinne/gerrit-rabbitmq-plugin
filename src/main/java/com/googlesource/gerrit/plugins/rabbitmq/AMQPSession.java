@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.UUID;
 
 @Singleton
 public class AMQPSession implements ShutdownListener {
@@ -82,7 +81,7 @@ public class AMQPSession implements ShutdownListener {
             exchangeType = EXCHANGE_TYPE_FANOUT;
             routingKey = pluginName;
           }
-          exchangeName = UUID.randomUUID().toString();
+          exchangeName = exchangeType + "-" + properties.getAMQPQueue();
           LOGGER.debug("Exchange type: " + exchangeType);
           LOGGER.debug("Declare exchange: " + exchangeName);
           ch.exchangeDeclare(exchangeName, exchangeType, true);
