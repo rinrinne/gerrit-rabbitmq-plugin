@@ -10,15 +10,18 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
     password = guest
   [queue]
     name = gerrit-queue
+    decralation = false
     durable = true
     autoDelete = false
     exclusive = false
   [exchange]
     name = exchange-for-gerrit-queue
+    declaration = false
     type = fanout
     durable = true
     autoDelete = false
   [bind]
+    startUp = false
     routingKey = com.foobar.www.gerrit
   [message]
     deliveryMode = 1
@@ -46,7 +49,11 @@ amqp.password
     specified, defaults to "guest".
 
 queue.name
-:   The name of queue. You must set this property if you want to publish message.
+:   The name of queue. If not specified, defaults to "".
+
+queue.declare
+:   true if you want to declare queue on startup. If not specified, defaults to false.
+    Also need to specify `queue.name`.
 
 queue.durable
 :   true if you want to declare a drable queue. If not specified, defaults to true.
@@ -58,7 +65,10 @@ queue.exclusive
 :   true if you want to declare an exclusive queue. If not specified, defaults to false.
 
 exchange.name
-:   The name of exchange. If not specified, defaults to "exchange-for-*queue.name*".
+:   The name of exchange. If not specified, defaults to "gerrit.publish".
+
+exchange.declare
+:   true if you want to declare exchange on startup. If not specified, defaults to false.
 
 exchange.type
 :   The type of exchange. You can specify the following value:
@@ -71,6 +81,10 @@ exchange.durable
 
 exchange.autoDelete
 :   true if you want to declare an autodelete exchange. If not specified, defaults to false.
+
+bind.startup
+:   true if you want to bind queue to exchange on startup. If not specified, defaults to false.
+    Also need to specify `queue.name`.
 
 bind.routingKey
 :   The name of routing key. This is used to bind queue to exchange. If not specified, defaults to "".
@@ -88,10 +102,12 @@ message.routingKey
 
 gerrit.name
 :   The name of gerrit(not hostname). This is your given name to identify your gerrit.
+    If not specified, defaults to "".
     This can be used for message header only.
 
 gerrit.hostname
 :   The hostname of gerrit for SCM connection.
+    If not specified, defaults to "".
     This can be used for message header only.
 
 gerrit.scheme

@@ -22,7 +22,6 @@ public class AMQPSession implements ShutdownListener {
   private final Properties properties;
   private Connection connection;
   private Channel publishChannel;
-  private String exchangeName;
 
   @Inject
   public AMQPSession(Properties properties) {
@@ -67,33 +66,36 @@ public class AMQPSession implements ShutdownListener {
       try {
         Channel ch = connection.createChannel();
         LOGGER.info("Channel is opened.");
-        if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
-          LOGGER.info("Queue: " + properties.getString(Keys.QUEUE_NAME));
-          ch.queueDeclare(properties.getString(Keys.QUEUE_NAME),
-              properties.getBoolean(Keys.QUEUE_DURABLE),
-              properties.getBoolean(Keys.QUEUE_EXCLUSIVE),
-              properties.getBoolean(Keys.QUEUE_AUTODELETE), null);
-          exchangeName = "exchange-for-" + properties.getString(Keys.QUEUE_NAME);
+        if (properties.getBoolean(Keys.QUEUE_DECLARE)) {
+          LOGGER.info("Declare Queue...");
+          if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
+            LOGGER.info("Declare queue: " + properties.getString(Keys.QUEUE_NAME));
+            ch.queueDeclare(properties.getString(Keys.QUEUE_NAME),
+                properties.getBoolean(Keys.QUEUE_DURABLE),
+                properties.getBoolean(Keys.QUEUE_EXCLUSIVE),
+                properties.getBoolean(Keys.QUEUE_AUTODELETE), null);
+          }
+
+          if (properties.getBoolean(Keys.EXCHANGE_DECLARE)) {
+            LOGGER.info("Declare exchange: " + properties.getString(Keys.EXCHANGE_NAME));
+            ch.exchangeDeclare(properties.getString(Keys.EXCHANGE_NAME),
+                properties.getString(Keys.EXCHANGE_TYPE),
+                properties.getBoolean(Keys.EXCHANGE_DURABLE),
+                properties.getBoolean(Keys.EXCHANGE_AUTODELETE), null);
+          }
+
+          if (properties.getBoolean(Keys.BIND_STARTUP)) {
+            if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
+              LOGGER.info("Bind exchange and queue with key: " + properties.getString(Keys.BIND_ROUTINGKEY));
+              ch.queueBind(properties.getString(Keys.QUEUE_NAME),
+                  properties.getString(Keys.EXCHANGE_NAME),
+                  properties.getString(Keys.BIND_ROUTINGKEY));
+            }
+          }
+
+          publishChannel = ch;
+          LOGGER.info("Complete to setup channel.");
         }
-
-        if (StringUtils.isNotEmpty(properties.getString(Keys.EXCHANGE_NAME))) {
-          exchangeName = properties.getString(Keys.EXCHANGE_NAME);
-        }
-
-        LOGGER.info("Exchange: " + exchangeName);
-        ch.exchangeDeclare(exchangeName,
-            properties.getString(Keys.EXCHANGE_TYPE),
-            properties.getBoolean(Keys.EXCHANGE_DURABLE),
-            properties.getBoolean(Keys.EXCHANGE_AUTODELETE), null);
-
-        if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
-          LOGGER.info("Bind exchange and queue with key: " + properties.getString(Keys.BIND_ROUTINGKEY));
-          ch.queueBind(properties.getString(Keys.QUEUE_NAME),
-              exchangeName, properties.getString(Keys.BIND_ROUTINGKEY));
-        }
-
-        publishChannel = ch;
-        LOGGER.info("Complete to setup channel.");
       } catch (Exception ex) {
         LOGGER.warn("#bind: " + ex.getClass().getName());
         disconnect();
@@ -118,7 +120,9 @@ public class AMQPSession implements ShutdownListener {
     if (publishChannel != null && publishChannel.isOpen()) {
       try {
         LOGGER.debug("Send message.");
-        publishChannel.basicPublish(exchangeName, properties.getString(Keys.MESSAGE_ROUTINGKEY), properties.getBasicProperties(),
+        publishChannel.basicPublish(properties.getString(Keys.EXCHANGE_NAME),
+            properties.getString(Keys.MESSAGE_ROUTINGKEY),
+            properties.getBasicProperties(),
             message.getBytes(CharEncoding.UTF_8));
       } catch (Exception ex) {
         LOGGER.warn("#sendMessage: " + ex.getClass().getName());
