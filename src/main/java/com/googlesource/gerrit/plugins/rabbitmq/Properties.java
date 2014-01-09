@@ -5,7 +5,6 @@ import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import com.rabbitmq.client.AMQP;
 
@@ -23,7 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Singleton
 public class Properties {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
