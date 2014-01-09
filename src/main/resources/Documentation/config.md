@@ -5,25 +5,35 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
 
 ```
   [amqp]
-    uri = amqp://www.foobar.com:5672
+    uri = amqp://localhost
     username = guest
     password = guest
-    queue = gerrit-queue
-    exchange = direct-gerrit-exchange
+  [queue]
+    name = gerrit-queue
+    durable = true
+    autoDelete = false
+    exclusive = false
+  [exchange]
+    name = exchange-for-gerrit-queue
+    type = fanout
+    durable = true
+    autoDelete = false
+  [bind]
+    routingKey = com.foobar.www.gerrit
+  [message]
+    deliveryMode = 1
+    priority = 0
     routingKey = com.foobar.www.gerrit
   [gerrit]
     name = foobar-gerrit
     hostname = www.foobar.com
     scheme = ssh
     port = 24918
-  [message]
-    deliveryMode = 1
-    priority = 0
   [monitor]
     interval = 15000
 ```
 
-amqp.ri
+amqp.uri
 :   The URI of RabbitMQ server's endpoint. If not specified,
     defaults to "amqp://localhost".
 
@@ -35,23 +45,48 @@ amqp.password
 :   Password for RabbitMQ connection authentication. If not
     specified, defaults to "guest".
 
-amqp.queue
-:   The name of queue. If specified, this queue is declared to RabbitMQ.
-    Also the unique exchange is declated with `direct` type (or `fanout`
-    type if `amqp.routingKey` is not specified). Then bind queue
-    from this exchange.
-    +
-    Note that `amqp.exchange` is ignored.
+queue.name
+:   The name of queue. You must set this property if you want to publish message.
 
-amqp.exchange
-:   The name of exchange. This is used when `amqp.queue` is not specified.
-    The named exchange is not created. It means that it would be failure
-    if named exchange is not exist in RabbitMQ.
+queue.durable
+:   true if you want to declare a drable queue. If not specified, defaults to true.
 
-amqp.routingKey
-:   The name of routing key. if not specified, defaults to the same as plugin name.
+queue.autoDelete
+:   true if you want to declare an autodelete queue. If not specified, defaults to false.
 
-gerrit.mame
+queue.exclusive
+:   true if you want to declare an exclusive queue. If not specified, defaults to false.
+
+exchange.name
+:   The name of exchange. If not specified, defaults to "exchange-for-*queue.name*".
+
+exchange.type
+:   The type of exchange. You can specify the following value:
+     * "direct"
+     * "fanout"
+     * "topic"
+
+exchange.durable
+:   true if you want to declare a durable exchange. If not specified, defaults to true.
+
+exchange.autoDelete
+:   true if you want to declare an autodelete exchange. If not specified, defaults to false.
+
+bind.routingKey
+:   The name of routing key. This is used to bind queue to exchange. If not specified, defaults to "".
+
+message.deliverMode
+:   The delivery mode. if not specified, defaults to 1.
+    * 1 - non-persistent
+    * 2 - persistent
+
+message.priority
+:   The priority of message. if not specified, defaults to 0.
+
+message.routingKey
+:   The name of routingKey. This is stored to message property. If not specified, defaults to "".
+
+gerrit.name
 :   The name of gerrit(not hostname). This is your given name to identify your gerrit.
     This can be used for message header only.
 
@@ -68,14 +103,6 @@ gerrit.port
 :   The port number of gerrit for SCM connection.
     If not specified, defaults to 29418.
     This can be used for message header only.
-
-message.deliverMode
-:   The delivery mode. if not specified, defaults to 1.
-    * 1 - non-persistent
-    * 2 - persistent
-
-message.priority
-:   The priority of message. if not specified, defaults to 0.
 
 monitor.interval
 :   The interval time in milliseconds for connection monitor.

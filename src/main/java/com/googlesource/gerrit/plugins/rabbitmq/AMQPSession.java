@@ -87,7 +87,7 @@ public class AMQPSession implements ShutdownListener {
             properties.getBoolean(Keys.EXCHANGE_AUTODELETE), null);
 
         if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
-          LOGGER.debug("Bind exchange and queue with key: " + properties.getString(Keys.BIND_ROUTINGKEY));
+          LOGGER.info("Bind exchange and queue with key: " + properties.getString(Keys.BIND_ROUTINGKEY));
           ch.queueBind(properties.getString(Keys.QUEUE_NAME),
               exchangeName, properties.getString(Keys.BIND_ROUTINGKEY));
         }
