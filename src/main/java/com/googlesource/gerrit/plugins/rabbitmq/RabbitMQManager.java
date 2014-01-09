@@ -40,7 +40,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
           session.connect();
         }
       }
-    }, MONITOR_FIRSTTIME_DELAY, properties.getConnectionMonitorInterval());
+    }, MONITOR_FIRSTTIME_DELAY, properties.getInt(Keys.MONITOR_INTERVAL));
   }
 
   @Override

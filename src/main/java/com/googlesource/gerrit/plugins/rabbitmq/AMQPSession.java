@@ -1,6 +1,5 @@
 package com.googlesource.gerrit.plugins.rabbitmq;
 
-import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -22,18 +21,14 @@ import java.net.URISyntaxException;
 public class AMQPSession implements ShutdownListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQPSession.class);
-  private static final String EXCHANGE_TYPE_DIRECT ="direct";
-  private static final String EXCHANGE_TYPE_FANOUT ="fanout";
   private final Properties properties;
-  private final String pluginName;
   private Connection connection;
   private Channel publishChannel;
   private String exchangeName;
 
   @Inject
-  public AMQPSession(@PluginName String pluginName, Properties properties) {
+  public AMQPSession(Properties properties) {
     this.properties = properties;
-    this.pluginName = pluginName;
   }
 
   public boolean isOpen() {
@@ -44,16 +39,16 @@ public class AMQPSession implements ShutdownListener {
   }
 
   public void connect() {
-    LOGGER.info("Connect to " + properties.getAMQPUri() + "...");
+    LOGGER.info("Connect to " + properties.getString(Keys.AMQP_URI) + "...");
     ConnectionFactory factory = new ConnectionFactory();
     try {
-      if (StringUtils.isNotEmpty(properties.getAMQPUri())) {
-        factory.setUri(properties.getAMQPUri());
-        if (StringUtils.isNotEmpty(properties.getAMQPUsername())) {
-          factory.setUsername(properties.getAMQPUsername());
+      if (StringUtils.isNotEmpty(properties.getString(Keys.AMQP_URI))) {
+        factory.setUri(properties.getString(Keys.AMQP_URI));
+        if (StringUtils.isNotEmpty(properties.getString(Keys.AMQP_USERNAME))) {
+          factory.setUsername(properties.getString(Keys.AMQP_USERNAME));
         }
-        if (StringUtils.isNotEmpty(properties.getAMQPPassword())) {
-          factory.setPassword(properties.getAMQPPassword());
+        if (StringUtils.isNotEmpty(properties.getString(Keys.AMQP_PASSWORD))) {
+          factory.setPassword(properties.getString(Keys.AMQP_PASSWORD));
         }
         connection = factory.newConnection();
         connection.addShutdownListener(this);
@@ -61,7 +56,7 @@ public class AMQPSession implements ShutdownListener {
       }
       bind();
     } catch (URISyntaxException ex) {
-      LOGGER.error("URI syntax error: " + properties.getAMQPUri());
+      LOGGER.error("URI syntax error: " + properties.getString(Keys.AMQP_URI));
     } catch (IOException ex) {
       LOGGER.error("Connection cannot be opened.");
     } catch (Exception ex) {
@@ -73,35 +68,34 @@ public class AMQPSession implements ShutdownListener {
     if (connection != null && publishChannel == null) {
       try {
         Channel ch = connection.createChannel();
-        if (StringUtils.isNotEmpty(properties.getAMQPQueue())) {
-          LOGGER.info("Queue mode");
-          String exchangeType = EXCHANGE_TYPE_DIRECT;
-          String routingKey = properties.getAMQPRoutingKey();
-          if (routingKey.isEmpty()) {
-            exchangeType = EXCHANGE_TYPE_FANOUT;
-            routingKey = pluginName;
-          }
-          exchangeName = exchangeType + "-" + properties.getAMQPQueue();
-          LOGGER.debug("Exchange type: " + exchangeType);
-          LOGGER.debug("Declare exchange: " + exchangeName);
-          ch.exchangeDeclare(exchangeName, exchangeType, true);
-          LOGGER.debug("Declare queue: " + properties.getAMQPQueue());
-          ch.queueDeclare(properties.getAMQPQueue(), true, false, false, null);
-          LOGGER.debug("Bind exchange and queue with key: " + routingKey);
-          ch.queueBind(properties.getAMQPQueue(), exchangeName, routingKey);
-          publishChannel = ch;
-          LOGGER.info("Channel for queue \"" + properties.getAMQPQueue() + "\" opened.");
-        } else if (StringUtils.isNotEmpty(properties.getAMQPExchange())) {
-          LOGGER.info("Exchange mode");
-          exchangeName = properties.getAMQPExchange();
-          LOGGER.debug("Declare exchange: " + exchangeName);
-          ch.exchangeDeclarePassive(exchangeName);
-          publishChannel = ch;
-          LOGGER.info("Channel for exchange \"" + exchangeName + "\" opened.");
-        } else {
-          LOGGER.warn("Unrecognized bind mode.");
-          throw new IOException();
+        LOGGER.info("Channel is opened.");
+        if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
+          LOGGER.info("Queue: " + properties.getString(Keys.QUEUE_NAME));
+          ch.queueDeclare(properties.getString(Keys.QUEUE_NAME),
+              properties.getBoolean(Keys.QUEUE_DURABLE),
+              properties.getBoolean(Keys.QUEUE_EXCLUSIVE),
+              properties.getBoolean(Keys.QUEUE_AUTODELETE), null);
+          exchangeName = "exchange-for-" + properties.getString(Keys.QUEUE_NAME);
         }
+
+        if (StringUtils.isNotEmpty(properties.getString(Keys.EXCHANGE_NAME))) {
+          exchangeName = properties.getString(Keys.EXCHANGE_NAME);
+        }
+
+        LOGGER.info("Exchange: " + exchangeName);
+        ch.exchangeDeclare(exchangeName,
+            properties.getString(Keys.EXCHANGE_TYPE),
+            properties.getBoolean(Keys.EXCHANGE_DURABLE),
+            properties.getBoolean(Keys.EXCHANGE_AUTODELETE), null);
+
+        if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
+          LOGGER.debug("Bind exchange and queue with key: " + properties.getString(Keys.BIND_ROUTINGKEY));
+          ch.queueBind(properties.getString(Keys.QUEUE_NAME),
+              exchangeName, properties.getString(Keys.BIND_ROUTINGKEY));
+        }
+
+        publishChannel = ch;
+        LOGGER.info("Complete to setup channel.");
       } catch (Exception ex) {
         LOGGER.warn("#bind: " + ex.getClass().getName());
         disconnect();
@@ -126,7 +120,7 @@ public class AMQPSession implements ShutdownListener {
     if (publishChannel != null && publishChannel.isOpen()) {
       try {
         LOGGER.debug("Send message.");
-        publishChannel.basicPublish(exchangeName, properties.getAMQPRoutingKey(), properties.getBasicProperties(),
+        publishChannel.basicPublish(exchangeName, properties.getString(Keys.MESSAGE_ROUTINGKEY), properties.getBasicProperties(),
             message.getBytes(CharEncoding.UTF_8));
       } catch (Exception ex) {
         LOGGER.warn("#sendMessage: " + ex.getClass().getName());
