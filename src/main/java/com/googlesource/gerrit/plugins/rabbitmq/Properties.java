@@ -1,7 +1,6 @@
 package com.googlesource.gerrit.plugins.rabbitmq;
 
 import com.google.gerrit.common.Version;
-import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
@@ -25,6 +24,7 @@ import java.util.Map;
 public class Properties {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
+  private final static String CONFIG_FILENAME = "rabbitmq.config";
   private final static String GERRIT = "gerrit";
   private final static String CONTENT_TYPE_JSON = "application/json";
 
@@ -35,10 +35,9 @@ public class Properties {
   private AMQP.BasicProperties properties;
 
   @Inject
-  public Properties(@PluginName final String pluginName, final SitePaths site,
-      @GerritServerConfig final Config config) {
+  public Properties(final SitePaths site, @GerritServerConfig final Config config) {
     this.config = config;
-    this.pluginConfig = getPluginConfig(new File(site.etc_dir, pluginName + ".config"));
+    this.pluginConfig = getPluginConfig(new File(site.etc_dir, CONFIG_FILENAME));
   }
 
   public Config getPluginConfig(File cfgPath) {
