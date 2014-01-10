@@ -17,7 +17,7 @@ Now available for Gerrit 2.8 only, but you may use this on another version of Ge
 BUild
 ---------------------
 
-> mvn package
+    mvn package
 
 License
 ---------------------
