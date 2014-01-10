@@ -24,6 +24,26 @@ limitations under the License.
   <version>1.0-SNAPSHOT</version>
   <name>Gerrit RabbitMQ plugin</name>
 
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>
+        Copyright (c) 2013 rinrinne a.k.a. rin_ne All rights reserved.
+      </comments>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>rin_ne</id>
+      <name>rinrinne</name>
+      <email>rinrin.ne@gmail.com</email>
+      <timezone>+9</timezone>
+    </developer>
+  </developers>
+
   <properties>
     <Gerrit-ApiType>plugin</Gerrit-ApiType>
     <Gerrit-ApiVersion>2.8</Gerrit-ApiVersion>
@@ -106,7 +126,13 @@ limitations under the License.
   <repositories>
     <repository>
       <id>gerrit-api-repository</id>
-      <url>https://gerrit-api.storage.googleapis.com/snapshot/</url>
+      <url>https://gerrit-api.storage.googleapis.com/</url>
     </repository>
   </repositories>
+
+  <scm>
+    <connection>scm:git:http://github.com/rinrinne/gerrit-rabbitmq-plugin.git</connection>
+    <developerConnection>scm:git:https://github.com/rinrinne/gerrit-rabbitmq-plugin.git</developerConnection>
+    <url>https://github.com/rinrinne/gerrit-rabbitmq-plugin</url>
+  </scm>
 </project>
