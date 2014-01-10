@@ -18,7 +18,7 @@ public enum Keys {
   AMQP_URI("amqp.uri", null, "amqp://localhost"),
   AMQP_USERNAME("amqp.username", null, "guest"),
   AMQP_PASSWORD("amqp.password", null, "guest"),
-  QUEUE_NAME("queue.name", null, ""),
+  QUEUE_NAME("queue.name", null, "gerrit.events"),
   QUEUE_DECLARE("queue.declare", null, false),
   QUEUE_DURABLE("queue.durable", null, true),
   QUEUE_AUTODELETE("queue.autoDelete", null, false),

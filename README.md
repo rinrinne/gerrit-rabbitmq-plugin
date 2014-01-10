@@ -14,18 +14,6 @@ Published events are the same as Gerrit stream evnets.
 
 Now available for Gerrit 2.8 only, but you may use this on another version of Gerrit if you modify `Gerrit-ApiVersion` in pom.xml.
 
-Minimum configuration
-----------------------
-
-In `rabbitmq.config`
-
-```
-[amqp]
-  uri = amqp://localhost
-```
-
-You should declare exchange named `gerrit.publish` beforehand.
-
 License
 ---------------------
 

@@ -50,7 +50,6 @@ queue.name
 
 queue.declare
 :   true if you want to declare queue on startup.
-    Also need to specify `queue.name`.
 
 queue.durable
 :   true if you want to declare a drable queue.
@@ -122,19 +121,21 @@ Default Values
 
 You can change the below values by specifying them in `rabbitmq.config`.
 
+**Bold** is String value.
+
 |name                | value
 |:-------------------|:------------------
-|amqp.uri            | amqp://localhost
-|amqp.username       | guest
-|amqp.password       | guest
-|queue.name          | *Empty*
+|amqp.uri            | **amqp://localhost**
+|amqp.username       | **guest**
+|amqp.password       | **guest**
+|queue.name          | **gerrit.events**
 |queue.declare       | false
 |queue.durable       | true
 |queue.autoDelete    | false
 |queue.exclusive     | false
-|exchange.name       | gerrit.publish
+|exchange.name       | **gerrit.publish**
 |exchange.declare    | false
-|exchange.type       | fanout
+|exchange.type       | **fanout**
 |exchange.durable    | false
 |exchange.autoDelete | false
 |bind.startUp        | false
@@ -144,6 +145,6 @@ You can change the below values by specifying them in `rabbitmq.config`.
 |message.routingKey  | *Empty*
 |gerrit.name         | *Empty*
 |gerrit.hostname     | *Empty*
-|gerrit.scheme       | ssh
+|gerrit.scheme       | **ssh**
 |gerrit.port         | 29418
 |monitor.interval    | 15000

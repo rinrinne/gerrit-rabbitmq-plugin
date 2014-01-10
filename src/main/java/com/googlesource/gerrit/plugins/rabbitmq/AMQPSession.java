@@ -81,7 +81,7 @@ public class AMQPSession implements ShutdownListener {
         Channel ch = connection.createChannel();
         LOGGER.info("Channel is opened.");
         if (properties.getBoolean(Keys.QUEUE_DECLARE)) {
-          LOGGER.info("Declare Queue...");
+          LOGGER.info("Declare queue...");
           if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
             LOGGER.info("Declare queue: " + properties.getString(Keys.QUEUE_NAME));
             ch.queueDeclare(properties.getString(Keys.QUEUE_NAME),
@@ -91,15 +91,19 @@ public class AMQPSession implements ShutdownListener {
           }
 
           if (properties.getBoolean(Keys.EXCHANGE_DECLARE)) {
-            LOGGER.info("Declare exchange: " + properties.getString(Keys.EXCHANGE_NAME));
-            ch.exchangeDeclare(properties.getString(Keys.EXCHANGE_NAME),
-                properties.getString(Keys.EXCHANGE_TYPE),
-                properties.getBoolean(Keys.EXCHANGE_DURABLE),
-                properties.getBoolean(Keys.EXCHANGE_AUTODELETE), null);
+            LOGGER.info("Declare exchange...");
+            if (StringUtils.isNotEmpty(properties.getString(Keys.EXCHANGE_NAME))) {
+              LOGGER.info("Declare exchange: " + properties.getString(Keys.EXCHANGE_NAME));
+              ch.exchangeDeclare(properties.getString(Keys.EXCHANGE_NAME),
+                  properties.getString(Keys.EXCHANGE_TYPE),
+                  properties.getBoolean(Keys.EXCHANGE_DURABLE),
+                  properties.getBoolean(Keys.EXCHANGE_AUTODELETE), null);
+            }
           }
 
           if (properties.getBoolean(Keys.BIND_STARTUP)) {
-            if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
+            if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME)) &&
+                StringUtils.isNotEmpty(properties.getString(Keys.EXCHANGE_NAME))) {
               LOGGER.info("Bind exchange and queue with key: " + properties.getString(Keys.BIND_ROUTINGKEY));
               ch.queueBind(properties.getString(Keys.QUEUE_NAME),
                   properties.getString(Keys.EXCHANGE_NAME),
