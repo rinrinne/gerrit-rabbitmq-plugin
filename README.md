@@ -14,7 +14,7 @@ Published events are the same as Gerrit stream evnets.
 
 Now available for Gerrit 2.8 only, but you may use this on another version of Gerrit if you modify `Gerrit-ApiVersion` in pom.xml.
 
-BUild
+Build
 ---------------------
 
     mvn package
