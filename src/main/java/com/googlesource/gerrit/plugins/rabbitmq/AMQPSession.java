@@ -116,7 +116,7 @@ public class AMQPSession implements ShutdownListener {
     }
   }
 
-  public void sendMessage(String message) {
+  public void publishMessage(String message) {
     if (publishChannel != null && publishChannel.isOpen()) {
       try {
         LOGGER.debug("Send message.");

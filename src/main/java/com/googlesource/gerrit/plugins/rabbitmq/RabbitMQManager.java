@@ -51,7 +51,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
 
   @Override
   public void onChangeEvent(ChangeEvent event) {
-    session.sendMessage(gson.toJson(event));
+    session.publishMessage(gson.toJson(event));
   }
 
 }
