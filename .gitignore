@@ -4,3 +4,5 @@
 /.checkstyle
 /.project
 /.settings
+/pom.xml.*
+/release.properties
