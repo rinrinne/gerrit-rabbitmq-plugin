@@ -28,6 +28,21 @@ Reference
 [Configuration]: https://github.com/rinrinne/gerrit-rabbitmq-plugin/blob/master/src/main/resources/Documentation/config.md
 [Message Format]: https://github.com/rinrinne/gerrit-rabbitmq-plugin/blob/master/src/main/resources/Documentation/message.md
 
+Minimum Configuration
+---------------------
+
+```
+  [amqp]
+    uri = amqp://localhost
+  [exchange]
+    name = exchange-for-gerrit-queue
+  [message]
+    routingKey = com.foobar.www.gerrit
+  [gerrit]
+    name = foobar-gerrit
+    hostname = www.foobar.com
+```
+
 License
 ---------------------
 
