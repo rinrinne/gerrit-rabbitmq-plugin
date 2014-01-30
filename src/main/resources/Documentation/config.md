@@ -36,84 +36,84 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
     interval = 15000
 ```
 
-amqp.uri
-:   The URI of RabbitMQ server's endpoint.
+* `amqp.uri`
+  * The URI of RabbitMQ server's endpoint.
 
-amqp.username
-:   Username for RabbitMQ connection authentication.
+* `amqp.username`
+  * Username for RabbitMQ connection authentication.
 
-amqp.password
-:   Password for RabbitMQ connection authentication.
+* `amqp.password`
+  * Password for RabbitMQ connection authentication.
 
-queue.name
-:   The name of queue.
+* `queue.name`
+  * The name of queue.
 
-queue.declare
-:   true if you want to declare queue on startup.
+* `queue.declare`
+  * true if you want to declare queue on startup.
 
-queue.durable
-:   true if you want to declare a drable queue.
+* `queue.durable`
+  * true if you want to declare a drable queue.
 
-queue.autoDelete
-:   true if you want to declare an autodelete queue.
+* `queue.autoDelete`
+  * true if you want to declare an autodelete queue.
 
-queue.exclusive
-:   true if you want to declare an exclusive queue.
+* `queue.exclusive`
+  * true if you want to declare an exclusive queue.
 
-exchange.name
-:   The name of exchange.
+* `exchange.name`
+  * The name of exchange.
 
-exchange.declare
-:   true if you want to declare exchange on startup.
+* `exchange.declare`
+  * true if you want to declare exchange on startup.
 
-exchange.type
-:   The type of exchange. You can specify the following value:
-     * "direct"
-     * "fanout"
-     * "topic"
+* `exchange.type`
+  * The type of exchange. You can specify the following value:
+    * "direct"
+    * "fanout"
+    * "topic"
 
-exchange.durable
-:   true if you want to declare a durable exchange.
+* `exchange.durable`
+  * true if you want to declare a durable exchange.
 
-exchange.autoDelete
-:   true if you want to declare an autodelete exchange.
+* `exchange.autoDelete`
+  * true if you want to declare an autodelete exchange.
 
-bind.startUp
-:   true if you want to bind queue to exchange on startup.
+* `bind.startUp`
+  * true if you want to bind queue to exchange on startup.
     Also need to specify `queue.name` and `exchange.name`.
 
-bind.routingKey
-:   The name of routing key. This is used to bind queue to exchange.
+* `bind.routingKey`
+  * The name of routing key. This is used to bind queue to exchange.
 
-message.deliveryMode
-:   The delivery mode. if not specified, defaults to 1.
+* `message.deliveryMode`
+  * The delivery mode. if not specified, defaults to 1.
     * 1 - non-persistent
     * 2 - persistent
 
-message.priority
-:   The priority of message. if not specified, defaults to 0.
+* `message.priority`
+  * The priority of message. if not specified, defaults to 0.
 
-message.routingKey
-:   The name of routingKey. This is stored to message property.
+* `message.routingKey`
+  * The name of routingKey. This is stored to message property.
 
-gerrit.name
-:   The name of gerrit(not hostname). This is your given name to identify your gerrit.
+* `gerrit.name`
+  * The name of gerrit(not hostname). This is your given name to identify your gerrit.
     This can be used for message header only.
 
-gerrit.hostname
-:   The hostname of gerrit for SCM connection.
+* `gerrit.hostname`
+  * The hostname of gerrit for SCM connection.
     This can be used for message header only.
 
-gerrit.scheme
-:   The scheme of gerrit for SCM connection.
+* `gerrit.scheme`
+  * The scheme of gerrit for SCM connection.
     This can be used for message header only.
 
-gerrit.port
-:   The port number of gerrit for SCM connection.
+* `gerrit.port`
+  * The port number of gerrit for SCM connection.
     This can be used for message header only.
 
-monitor.interval
-:   The interval time in milliseconds for connection monitor.
+* `monitor.interval`
+  * The interval time in milliseconds for connection monitor.
     You can specify the value more than 5000.
 
 Default Values
