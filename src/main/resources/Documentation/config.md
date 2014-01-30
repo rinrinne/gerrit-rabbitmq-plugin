@@ -80,7 +80,7 @@ exchange.autoDelete
 
 bind.startUp
 :   true if you want to bind queue to exchange on startup.
-    Also need to specify `queue.name`.
+    Also need to specify `queue.name` and `exchange.name`.
 
 bind.routingKey
 :   The name of routing key. This is used to bind queue to exchange.
