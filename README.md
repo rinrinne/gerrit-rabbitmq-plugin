@@ -19,6 +19,15 @@ Build
 
     mvn package
 
+Reference
+---------------------
+
+* [Configuration]
+* [Message Format]
+
+[Configuration]: https://github.com/rinrinne/gerrit-rabbitmq-plugin/blob/master/src/main/resources/Documentation/config.md
+[Message Format]: https://github.com/rinrinne/gerrit-rabbitmq-plugin/blob/master/src/main/resources/Documentation/message.md
+
 License
 ---------------------
 
