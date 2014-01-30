@@ -85,7 +85,7 @@ bind.startUp
 bind.routingKey
 :   The name of routing key. This is used to bind queue to exchange.
 
-message.deliverMode
+message.deliveryMode
 :   The delivery mode. if not specified, defaults to 1.
     * 1 - non-persistent
     * 2 - persistent
@@ -123,28 +123,28 @@ You can change the below values by specifying them in `rabbitmq.config`.
 
 **Bold** is String value.
 
-|name                | value
-|:-------------------|:------------------
-|amqp.uri            | **amqp://localhost**
-|amqp.username       | **guest**
-|amqp.password       | **guest**
-|queue.name          | **gerrit.events**
-|queue.declare       | false
-|queue.durable       | true
-|queue.autoDelete    | false
-|queue.exclusive     | false
-|exchange.name       | **gerrit.publish**
-|exchange.declare    | false
-|exchange.type       | **fanout**
-|exchange.durable    | false
-|exchange.autoDelete | false
-|bind.startUp        | false
-|bind.routingKey     | *Empty*
-|message.deliverMode | 1
-|message.priority    | 0
-|message.routingKey  | *Empty*
-|gerrit.name         | *Empty*
-|gerrit.hostname     | *Empty*
-|gerrit.scheme       | **ssh**
-|gerrit.port         | 29418
-|monitor.interval    | 15000
+|name                 | value
+|:--------------------|:------------------
+|amqp.uri             | **amqp://localhost**
+|amqp.username        | **guest**
+|amqp.password        | **guest**
+|queue.name           | **gerrit.events**
+|queue.declare        | false
+|queue.durable        | true
+|queue.autoDelete     | false
+|queue.exclusive      | false
+|exchange.name        | **gerrit.publish**
+|exchange.declare     | false
+|exchange.type        | **fanout**
+|exchange.durable     | false
+|exchange.autoDelete  | false
+|bind.startUp         | false
+|bind.routingKey      | *Empty*
+|message.deliveryMode | 1
+|message.priority     | 0
+|message.routingKey   | *Empty*
+|gerrit.name          | *Empty*
+|gerrit.hostname      | *Empty*
+|gerrit.scheme        | **ssh**
+|gerrit.port          | 29418
+|monitor.interval     | 15000
