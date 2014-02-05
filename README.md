@@ -46,12 +46,12 @@ Minimum Configuration
 History
 ---------------------
 
-* *1.1*
+* 1.1
   * Fix channel handling
   * Add property: `monitor.failureCount`
   * Update README and documents 
 
-* *1.0*
+* 1.0
   *  First release
 
 License
