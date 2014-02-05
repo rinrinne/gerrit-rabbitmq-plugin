@@ -43,6 +43,17 @@ Minimum Configuration
     hostname = www.foobar.com
 ```
 
+History
+---------------------
+
+* *1.1*
+  * Fix channel handling
+  * Add property: `monitor.failureCount`
+  * Update README and documents 
+
+* *1.0*
+  *  First release
+
 License
 ---------------------
 
