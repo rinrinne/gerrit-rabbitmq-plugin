@@ -34,6 +34,7 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
     port = 24918
   [monitor]
     interval = 15000
+    failureCount = 15
 ```
 
 * `amqp.uri`
@@ -116,6 +117,10 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
     * The interval time in milliseconds for connection monitor.
       You can specify the value more than 5000.
 
+* `monitor.failureCount`
+    * The count of failure. If the command for publishing message failed in the specified number of times
+      in succession, connection will be renewed.
+
 Default Values
 -----------------
 
@@ -148,3 +153,4 @@ You can change the below values by specifying them in `rabbitmq.config`.
 |gerrit.scheme        | **ssh**
 |gerrit.port          | 29418
 |monitor.interval     | 15000
+|monitor.failureCount | 15

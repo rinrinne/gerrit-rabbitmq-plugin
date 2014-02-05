@@ -39,7 +39,8 @@ public enum Keys {
   GERRIT_PORT("gerrit.port", "gerrit-port", 29418),
   GERRIT_FRONT_URL("gerrit.canonicalWebUrl", "gerrit-front-url", ""),
   GERRIT_VERSION("gerrit.version", "gerrit-version", null),
-  MONITOR_INTERVAL("monitor.interval", null, 15000);
+  MONITOR_INTERVAL("monitor.interval", null, 15000),
+  MONITOR_FAILURECOUNT("monitor.failureCount", null, 15);
 
   public String section;
   public String name;
