@@ -4,6 +4,8 @@ gerrit-rabbitmq-plugin: Gerrit event publish plugin via RabbitMQ
 * Author: rinrinne a.k.a. rin_ne
 * Repository: http://github.com/rinrinne/gerrit-rabbitmq-plugin
 
+[![Build Status](https://travis-ci.org/rinrinne/gerrit-rabbitmq-plugin.png?branch=master)](https://travis-ci.org/rinrinne/gerrit-rabbitmq-plugin)
+
 Synopsis
 ----------------------
 
