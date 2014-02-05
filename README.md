@@ -46,6 +46,10 @@ Minimum Configuration
 History
 ---------------------
 
+* 1.2
+  * Fix repository location for gerrit-api
+  * Update README
+
 * 1.1
   * Fix channel handling
   * Add property: `monitor.failureCount`
