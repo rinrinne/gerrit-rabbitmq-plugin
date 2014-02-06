@@ -14,6 +14,7 @@ This is Gerrit plugin.
 This can publish gerrit events to message queue provided by RabbitMQ.
 Published events are the same as Gerrit stream evnets.
 
+This plugin works on Gerrit 2.8 or later.
 
 Build
 ---------------------
