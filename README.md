@@ -14,12 +14,15 @@ This is Gerrit plugin.
 This can publish gerrit events to message queue provided by RabbitMQ.
 Published events are the same as Gerrit stream evnets.
 
-Now available for Gerrit 2.8 only, but you may use this on another version of Gerrit if you modify `Gerrit-ApiVersion` in pom.xml.
 
 Build
 ---------------------
 
     mvn package
+
+Now avaliable for Gerrit 2.8.1 only. If you want to use it on another version of Gerrit, please try the below.
+
+    mvn package -DGerrit-ApiVersion=2.8
 
 Reference
 ---------------------

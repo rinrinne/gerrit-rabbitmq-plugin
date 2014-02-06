@@ -2,3 +2,9 @@ language: java
 jdk:
   - oraclejdk7
   - openjdk7
+env:
+  matrix:
+    - API_VERSION=2.8
+    - API_VERSION=2.8.1
+
+script: mvn package -DGerrit-ApiVersion=$API_VERSION
