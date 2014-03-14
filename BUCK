@@ -23,5 +23,5 @@ gerrit_plugin(
 maven_jar(
   name = 'rabbitmq-amqp-client',
   id = 'com.rabbitmq:amqp-client:3.2.2',
-  license = 'Apache2.0',
+  license = 'MPL1.1',
 )
