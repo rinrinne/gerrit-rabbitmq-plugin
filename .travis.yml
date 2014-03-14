@@ -6,6 +6,8 @@ env:
   matrix:
     - API_VERSION=2.8
     - API_VERSION=2.8.1
+    - API_VERSION=2.8.2
+    - API_VERSION=2.8.3
 
 before_script: ./script/before_build.sh
 
