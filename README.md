@@ -39,14 +39,14 @@ Build
 
 * Using `maven`
 
-    mvn package
+      mvn package
 
 * Using `buck`
 
-    git clone git clone https://gerrit.googlesource.com/gerrit
-    ln -s $(pwd) gerrit/plugins/rabbitmq
-    cd gerrit
-    buck build plugins/rabbitmq:rabbitmq
+      git clone git clone https://gerrit.googlesource.com/gerrit
+      ln -s $(pwd) gerrit/plugins/rabbitmq
+      cd gerrit
+      buck build plugins/rabbitmq:rabbitmq
 
 Using another version API
 --------------------------
