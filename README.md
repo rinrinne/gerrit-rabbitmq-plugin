@@ -37,16 +37,20 @@ Environments
 Build
 ---------------------
 
-* Using `maven`
+* Use `maven`
 
-      mvn package
+To build plugin with maven.
 
-* Using `buck`
+    mvn package
 
-      git clone git clone https://gerrit.googlesource.com/gerrit
-      ln -s $(pwd) gerrit/plugins/rabbitmq
-      cd gerrit
-      buck build plugins/rabbitmq:rabbitmq
+* Use `buck`
+
+To build plugin with buck
+
+    git clone git clone https://gerrit.googlesource.com/gerrit
+    ln -s $(pwd) gerrit/plugins/rabbitmq
+    cd gerrit
+    buck build plugins/rabbitmq:rabbitmq
 
 Using another version API
 --------------------------
