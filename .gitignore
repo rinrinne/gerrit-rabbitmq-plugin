@@ -6,3 +6,4 @@
 /.settings
 /pom.xml.*
 /release.properties
+/gerrit
