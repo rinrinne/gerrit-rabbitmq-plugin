@@ -47,7 +47,7 @@ To build plugin with maven.
 
 To build plugin with buck
 
-    git clone https://gerrit.googlesource.com/gerrit
+    git clone https://gerrit.googlesource.com/gerrit -b v2.8.3
     ln -s $(pwd) gerrit/plugins/rabbitmq
     cd gerrit
     buck build plugins/rabbitmq:rabbitmq
@@ -57,7 +57,7 @@ Using another version API
 
 * For `maven`
 
-Now avaliable for Gerrit 2.8.1 only. If you want to use it on another version of Gerrit, please try the below.
+Now avaliable for Gerrit 2.8.3 only. If you want to use it on another version of Gerrit, please try the below.
 
     mvn package -DGerrit-ApiVersion=2.8
 
@@ -65,9 +65,9 @@ Now avaliable for Gerrit 2.8.1 only. If you want to use it on another version of
 
 After clone gerrit, you can checkout specified version.
 
-    git checkout -b v2.8 refs/tags/v2.8
+    git checkout -b 2.8 refs/tags/v2.8
 
-*NOTE*: Now available on master only.
+*NOTE*: If you want to build on master, please switch `dev` branch in this repository.
 
 Reference
 ---------------------
@@ -98,6 +98,7 @@ History
 
 * 1.3
   * Build with Buck
+  * Bumped api version to 2.8.3
 
 * 1.2
   * Fix repository location for gerrit-api

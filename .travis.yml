@@ -7,4 +7,8 @@ env:
     - API_VERSION=2.8
     - API_VERSION=2.8.1
 
-script: mvn package -DGerrit-ApiVersion=$API_VERSION
+before_build: ./script/before_build.sh
+
+script:
+  - mvn package -DGerrit-ApiVersion=$API_VERSION
+  - ./script/build.sh $API_VERSION

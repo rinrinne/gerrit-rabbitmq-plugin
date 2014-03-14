@@ -10,12 +10,10 @@ gerrit_plugin(
     'Gerrit-PluginName: rabbitmq',
     'Gerrit-Module: com.googlesource.gerrit.plugins.rabbitmq.Module',
   ],
-  compile_deps = [
+  deps = [
     '//lib/commons:lang',
     '//lib/commons:codec',
     '//lib:gson',
-  ],
-  deps = [
     ':rabbitmq-amqp-client',
   ],
 )
