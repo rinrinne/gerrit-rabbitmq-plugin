@@ -61,11 +61,13 @@ Now avaliable for Gerrit 2.8.1 only. If you want to use it on another version of
 
     mvn package -DGerrit-ApiVersion=2.8
 
-* for `buck`
+* For `buck`
 
 After clone gerrit, you can checkout specified version.
 
     git checkout -b v2.8 refs/tags/v2.8
+
+*NOTE*: Now available on master only.
 
 Reference
 ---------------------
