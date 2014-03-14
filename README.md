@@ -23,7 +23,7 @@ About Buck
 you need to setup it referring [Building with Buck] in gerrit documentation.
 
 [Buck]: http://facebook.github.io/buck/
-[Building with Buck]: https://gerrit-documentation.storage.googleapis.com/Documentation/2.8.2/dev-buck.html
+[Building with Buck]: https://gerrit-documentation.storage.googleapis.com/Documentation/2.8.3/dev-buck.html
 
 
 Environments
