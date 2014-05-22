@@ -11,6 +11,8 @@ env:
     - API_VERSION=2.8.4
     - API_VERSION=2.8.5
 
+install: true
+
 before_script: ./script/before_build.sh
 
 script:
