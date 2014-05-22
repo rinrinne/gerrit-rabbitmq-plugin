@@ -31,17 +31,17 @@ Environments
 
 * `linux`
   * `java-1.7`
-    * `maven-3.0.4`
+    * `gradle`
     * `buck`
 
 Build
 ---------------------
 
-* Use `maven`
+* Use `gradle`
 
 To build plugin with maven.
 
-    mvn package
+    ./gradlew build
 
 * Use `buck`
 
@@ -55,11 +55,11 @@ To build plugin with buck
 Using another version API
 --------------------------
 
-* For `maven`
+* For `gradle`
 
-Now avaliable for Gerrit 2.8.3 only. If you want to use it on another version of Gerrit, please try the below.
+Now avaliable for Gerrit 2.8.5 only. If you want to use it on another version of Gerrit, please try the below.
 
-    mvn package -DGerrit-ApiVersion=2.8
+    ./gradlew build -PapiVersion=2.8
 
 * For `buck`
 
@@ -95,6 +95,10 @@ Minimum Configuration
 
 History
 ---------------------
+
+* 1.4
+  * Add gradle support
+  * Remove maven support
 
 * 1.3
   * Build with Buck

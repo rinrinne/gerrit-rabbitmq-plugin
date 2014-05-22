@@ -1,4 +1,3 @@
-/target
 /work
 /build
 /.gradle
@@ -6,7 +5,5 @@
 /.checkstyle
 /.project
 /.settings
-/pom.xml.*
-/release.properties
 /gerrit
 /buck
