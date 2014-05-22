@@ -8,9 +8,11 @@ env:
     - API_VERSION=2.8.1
     - API_VERSION=2.8.2
     - API_VERSION=2.8.3
+    - API_VERSION=2.8.4
+    - API_VERSION=2.8.5
 
 before_script: ./script/before_build.sh
 
 script:
-  - mvn package -DGerrit-ApiVersion=$API_VERSION
+  - ./gradlew build -PapiVersion=$API_VERSION
   - ./script/build.sh $API_VERSION
