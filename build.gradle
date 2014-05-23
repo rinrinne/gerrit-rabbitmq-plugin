@@ -19,7 +19,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group = 'com.googlesource.gerrit.plugins.rabbitmq'
-version = '1.4'
+version = '1.5-SNAPSHOT'
 
 jar {
   manifest {
