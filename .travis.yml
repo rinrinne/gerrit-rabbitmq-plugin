@@ -11,11 +11,8 @@ env:
     - API_VERSION=2.8.4
     - API_VERSION=2.8.5
     - API_VERSION=2.9-rc1
+    - API_VERSION=2.9-rc2
 
 install: true
 
-before_script: ./script/before_build.sh
-
-script:
-  - ./gradlew build -PapiVersion=$API_VERSION
-  - ./script/build.sh $API_VERSION
+script: ./gradlew build -PapiVersion=$API_VERSION
