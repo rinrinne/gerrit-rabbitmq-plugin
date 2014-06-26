@@ -33,6 +33,8 @@ public enum Keys {
   MESSAGE_DELIVERY_MODE("message.deliveryMode", null, 1),
   MESSAGE_PRIORITY("message.priority", null, 0),
   MESSAGE_ROUTINGKEY("message.routingKey", null, ""),
+  CONSUME_ENABLED("consume.enabled", null, false),
+  CONSUME_QUEUE("consume.queue", null, "gerrit.review"),
   GERRIT_NAME("gerrit.name", "gerrit-name", ""),
   GERRIT_HOSTNAME("gerrit.hostname", "gerrit-host", ""),
   GERRIT_SCHEME("gerrit.scheme", "gerrit-scheme", "ssh"),
