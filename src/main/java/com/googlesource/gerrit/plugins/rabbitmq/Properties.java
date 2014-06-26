@@ -37,10 +37,13 @@ import java.util.Map;
 
 public class Properties {
 
+  // TODO: Value will be replaced to "gerrit.event".
+  public final static String EVENT_APPID = "gerrit";
+  public final static String APPROVE_APPID = "gerrit.approve";
+  public final static String CONTENT_TYPE_JSON = "application/json";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
   private final static String CONFIG_FILENAME = "rabbitmq.config";
-  private final static String GERRIT = "gerrit";
-  private final static String CONTENT_TYPE_JSON = "application/json";
 
   private final static int MINIMUM_CONNECTION_MONITOR_INTERVAL = 5000;
 
@@ -120,7 +123,7 @@ public class Properties {
       headers.put(Keys.GERRIT_VERSION.key, getGerritVersion());
 
       AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
-      builder.appId(GERRIT);
+      builder.appId(EVENT_APPID);
       builder.contentEncoding(CharEncoding.UTF_8);
       builder.contentType(CONTENT_TYPE_JSON);
       builder.deliveryMode(getInt(Keys.MESSAGE_DELIVERY_MODE));

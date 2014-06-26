@@ -15,10 +15,12 @@
 package com.googlesource.gerrit.plugins.rabbitmq;
 
 import com.google.inject.Inject;
-
+import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
 
@@ -36,6 +38,7 @@ public class AMQPSession implements ShutdownListener {
   private final Properties properties;
   private Connection connection;
   private Channel publishChannel;
+  private Channel consumeChannel;
   private volatile int failureCount = 0;
 
   @Inject
@@ -50,12 +53,12 @@ public class AMQPSession implements ShutdownListener {
     return false;
   }
 
-  private Channel getPublishChannel() {
-    Channel pubCh = null;
+  private Channel getChannel() {
+    Channel ch = null;
     if (connection != null) {
       try {
-        pubCh = connection.createChannel();
-        pubCh.addShutdownListener(this);
+        ch = connection.createChannel();
+        ch.addShutdownListener(this);
         failureCount = 0;
       } catch (Exception ex) {
         LOGGER.warn("Failed to open publish channel.");
@@ -66,7 +69,7 @@ public class AMQPSession implements ShutdownListener {
         disconnect();
       }
     }
-    return pubCh;
+    return ch;
   }
 
   public void connect() {
@@ -115,6 +118,10 @@ public class AMQPSession implements ShutdownListener {
         if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME)) &&
             StringUtils.isNotEmpty(properties.getString(Keys.EXCHANGE_NAME))) {
           bind();
+        }
+      }
+      if (properties.getBoolean(Keys.CONSUME_ENABLED)) {
+        if (StringUtils.isNotEmpty(properties.getString(Keys.CONSUME_QUEUE))) {
         }
       }
       LOGGER.info("Complete to setup channel.");
@@ -206,8 +213,8 @@ public class AMQPSession implements ShutdownListener {
   }
 
   public void publishMessage(String message) {
-    if (publishChannel == null) {
-      publishChannel = getPublishChannel();
+    if (publishChannel == null || !publishChannel.isOpen()) {
+      publishChannel = getChannel();
     }
     if (publishChannel != null && publishChannel.isOpen()) {
       try {
@@ -222,16 +229,66 @@ public class AMQPSession implements ShutdownListener {
     }
   }
 
+  public void consumeMessage() {
+    if (consumeChannel == null || !consumeChannel.isOpen()) {
+      consumeChannel = getChannel();
+    }
+    if (consumeChannel != null && consumeChannel.isOpen()) {
+      try {
+        consumeChannel.basicConsume(
+            properties.getString(Keys.CONSUME_QUEUE),
+            false,
+            new MessageConsumer(consumeChannel));
+        LOGGER.debug("Start consuming message.");
+      } catch (Exception ex) {
+        LOGGER.warn("Error when consuming message.", ex);
+      }
+    }
+  }
+
   @Override
   public void shutdownCompleted(ShutdownSignalException exception) {
     Object obj = exception.getReference();
 
     if (obj instanceof Channel) {
-      LOGGER.info("Channel closed.");
-      publishChannel = null;
+      Channel ch = (Channel) obj;
+      if (ch.equals(publishChannel)) {
+        LOGGER.info("Publish channel closed.");
+        publishChannel = null;
+      } else if (ch.equals(consumeChannel)) {
+        LOGGER.info("Consume channel closed.");
+        consumeChannel = null;
+      }
     } else if (obj instanceof Connection) {
       LOGGER.info("Connection disconnected.");
       connection = null;
+    }
+  }
+
+  public class MessageConsumer extends DefaultConsumer {
+
+    public MessageConsumer(Channel channel) {
+        super(channel);
+    }
+
+    @Override
+    public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties props, byte[] body)
+            throws IOException {
+      try {
+        long deliveryTag = envelope.getDeliveryTag();
+
+        if (Properties.APPROVE_APPID.equals(props.getAppId()) &&
+            Properties.CONTENT_TYPE_JSON.equals(props.getContentType())) {
+          // TODO: Get message then input as review. required 2.9 or later.
+        }
+
+        getChannel().basicAck(deliveryTag, false);
+
+      } catch (IOException ex) {
+        throw ex;
+      } catch (RuntimeException ex) {
+        LOGGER.warn("caught exception in delivery handler", ex);
+      }
     }
   }
 }
