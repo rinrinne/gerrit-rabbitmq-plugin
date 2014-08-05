@@ -103,101 +103,12 @@ public class AMQPSession implements ShutdownListener {
 
   private void setUp() {
     if (connection != null) {
-      if (properties.getBoolean(Keys.QUEUE_DECLARE)) {
-        LOGGER.info("Declare queue...");
+      if (properties.getBoolean(Keys.QUEUE_CONSUME)) {
         if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
-          createQueue();
-        }
-      }
-
-      if (properties.getBoolean(Keys.EXCHANGE_DECLARE)) {
-        LOGGER.info("Declare exchange...");
-        if (StringUtils.isNotEmpty(properties.getString(Keys.EXCHANGE_NAME))) {
-          createExchange();
-        }
-      }
-
-      if (properties.getBoolean(Keys.BIND_STARTUP)) {
-        if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME)) &&
-            StringUtils.isNotEmpty(properties.getString(Keys.EXCHANGE_NAME))) {
-          bind();
-        }
-      }
-      if (properties.getBoolean(Keys.CONSUME_ENABLED)) {
-        if (StringUtils.isNotEmpty(properties.getString(Keys.CONSUME_QUEUE))) {
+          consumeMessage();
         }
       }
       LOGGER.info("Complete to setup channel.");
-    }
-  }
-
-  public void createQueue() {
-    Channel ch;
-    boolean needDeclaration = false;
-    try {
-      ch = connection.createChannel();
-      ch.queueDeclarePassive(properties.getString(Keys.QUEUE_NAME));
-      ch.close();
-      LOGGER.info("Queue \"{}\" already exist.", properties.getString(Keys.QUEUE_NAME));
-    } catch (Exception ex) {
-      needDeclaration = true;
-    }
-
-    if (needDeclaration) {
-      LOGGER.info("Declare queue: {}", properties.getString(Keys.QUEUE_NAME));
-      try {
-        ch = connection.createChannel();
-        ch.queueDeclare(properties.getString(Keys.QUEUE_NAME),
-            properties.getBoolean(Keys.QUEUE_DURABLE),
-            properties.getBoolean(Keys.QUEUE_EXCLUSIVE),
-            properties.getBoolean(Keys.QUEUE_AUTODELETE), null);
-        ch.close();
-      } catch (Exception ex) {
-        LOGGER.warn("Failed to declare queue.", ex);
-      }
-    }
-  }
-
-  public void createExchange() {
-    Channel ch;
-    boolean needDeclaration = false;
-    try {
-      ch = connection.createChannel();
-      ch.exchangeDeclarePassive(properties.getString(Keys.EXCHANGE_NAME));
-      ch.close();
-      LOGGER.info("Exchange \"{}\" already exist.", properties.getString(Keys.EXCHANGE_NAME));
-    } catch (Exception ex) {
-      needDeclaration = true;
-    }
-
-    if (needDeclaration) {
-      LOGGER.info("Declare exchange: {}", properties.getString(Keys.EXCHANGE_NAME));
-      try {
-        ch = connection.createChannel();
-        ch.exchangeDeclare(properties.getString(Keys.EXCHANGE_NAME),
-            properties.getString(Keys.EXCHANGE_TYPE),
-            properties.getBoolean(Keys.EXCHANGE_DURABLE),
-            properties.getBoolean(Keys.EXCHANGE_AUTODELETE), null);
-        ch.close();
-      } catch (Exception ex) {
-        LOGGER.warn("Failed to declare exchange.", ex);
-      }
-    }
-  }
-
-  public void bind() {
-    LOGGER.info("Bind exchange \"{}\" and queue \"{}\"with key: {}", new Object[]{
-        properties.getString(Keys.QUEUE_NAME),
-        properties.getString(Keys.EXCHANGE_NAME),
-        properties.getString(Keys.BIND_ROUTINGKEY)});
-    try {
-      Channel ch = connection.createChannel();
-      ch.queueBind(properties.getString(Keys.QUEUE_NAME),
-          properties.getString(Keys.EXCHANGE_NAME),
-          properties.getString(Keys.BIND_ROUTINGKEY));
-      ch.close();
-    } catch (Exception ex) {
-      LOGGER.warn("Failed to declare binding.", ex);
     }
   }
 
@@ -239,7 +150,7 @@ public class AMQPSession implements ShutdownListener {
     if (consumeChannel != null && consumeChannel.isOpen()) {
       try {
         consumeChannel.basicConsume(
-            properties.getString(Keys.CONSUME_QUEUE),
+            properties.getString(Keys.QUEUE_NAME),
             false,
             new MessageConsumer(consumeChannel));
         LOGGER.debug("Start consuming message.");

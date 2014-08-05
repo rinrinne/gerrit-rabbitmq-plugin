@@ -62,6 +62,14 @@ Minimum Configuration
     hostname = www.foobar.com
 ```
 
+If you would like to consume messages in queue, you need to add the below.
+
+```
+[queue]
+  name = queue-for-review
+  consume = true
+```
+
 History
 ---------------------
 
@@ -81,7 +89,7 @@ History
 * 1.1
   * Fix channel handling
   * Add property: `monitor.failureCount`
-  * Update README and documents 
+  * Update README and documents
 
 * 1.0
   *  First release

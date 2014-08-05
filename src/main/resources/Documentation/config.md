@@ -10,19 +10,9 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
     password = guest
   [queue]
     name = gerrit-queue
-    decralation = false
-    durable = true
-    autoDelete = false
-    exclusive = false
+    consume = false
   [exchange]
     name = exchange-for-gerrit-queue
-    declaration = false
-    type = fanout
-    durable = false
-    autoDelete = false
-  [bind]
-    startUp = false
-    routingKey = com.foobar.www.gerrit
   [message]
     deliveryMode = 1
     priority = 0
@@ -49,42 +39,11 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
 * `queue.name`
     * The name of queue.
 
-* `queue.declare`
-    * true if you want to declare queue on startup.
-
-* `queue.durable`
-    * true if you want to declare a drable queue.
-
-* `queue.autoDelete`
-    * true if you want to declare an autodelete queue.
-
-* `queue.exclusive`
-    * true if you want to declare an exclusive queue.
+* `queue.consume`
+    * true if consume messages in queue.
 
 * `exchange.name`
     * The name of exchange.
-
-* `exchange.declare`
-    * true if you want to declare exchange on startup.
-
-* `exchange.type`
-    * The type of exchange. You can specify the following value:
-        * "direct"
-        * "fanout"
-        * "topic"
-
-* `exchange.durable`
-    * true if you want to declare a durable exchange.
-
-* `exchange.autoDelete`
-    * true if you want to declare an autodelete exchange.
-
-* `bind.startUp`
-    * true if you want to bind queue to exchange on startup.
-      Also need to specify `queue.name` and `exchange.name`.
-
-* `bind.routingKey`
-    * The name of routing key. This is used to bind queue to exchange.
 
 * `message.deliveryMode`
     * The delivery mode. if not specified, defaults to 1.
@@ -134,17 +93,8 @@ You can change the below values by specifying them in `rabbitmq.config`.
 |amqp.username        | **guest**
 |amqp.password        | **guest**
 |queue.name           | **gerrit.events**
-|queue.declare        | false
-|queue.durable        | true
-|queue.autoDelete     | false
-|queue.exclusive      | false
+|queue.consume        | false
 |exchange.name        | **gerrit.publish**
-|exchange.declare     | false
-|exchange.type        | **fanout**
-|exchange.durable     | false
-|exchange.autoDelete  | false
-|bind.startUp         | false
-|bind.routingKey      | *Empty*
 |message.deliveryMode | 1
 |message.priority     | 0
 |message.routingKey   | *Empty*
