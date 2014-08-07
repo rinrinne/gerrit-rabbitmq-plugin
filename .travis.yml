@@ -10,8 +10,9 @@ env:
     - API_VERSION=2.8.3
     - API_VERSION=2.8.4
     - API_VERSION=2.8.5
-    - API_VERSION=2.9-rc1
-    - API_VERSION=2.9-rc2
+    - API_VERSION=2.8.6
+    - API_VERSION=2.8.6.1
+    - API_VERSION=2.9
 
 install: true
 
