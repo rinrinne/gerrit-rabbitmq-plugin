@@ -62,14 +62,6 @@ Minimum Configuration
     hostname = www.foobar.com
 ```
 
-If you would like to consume messages in queue, you need to add the below.
-
-```
-[queue]
-  name = queue-for-review
-  consume = true
-```
-
 History
 ---------------------
 

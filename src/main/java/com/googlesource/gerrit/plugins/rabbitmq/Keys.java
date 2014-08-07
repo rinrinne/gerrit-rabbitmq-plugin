@@ -18,8 +18,6 @@ public enum Keys {
   AMQP_URI("amqp.uri", null, "amqp://localhost"),
   AMQP_USERNAME("amqp.username", null, "guest"),
   AMQP_PASSWORD("amqp.password", null, "guest"),
-  QUEUE_NAME("queue.name", null, "gerrit.events"),
-  QUEUE_CONSUME("queue.consume", null, false),
   EXCHANGE_NAME("exchange.name", null, "gerrit.publish"),
   MESSAGE_DELIVERY_MODE("message.deliveryMode", null, 1),
   MESSAGE_PRIORITY("message.priority", null, 0),

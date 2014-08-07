@@ -15,12 +15,12 @@
 package com.googlesource.gerrit.plugins.rabbitmq;
 
 import com.google.inject.Inject;
-import com.rabbitmq.client.AMQP.BasicProperties;
+// import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
+// import com.rabbitmq.client.DefaultConsumer;
+// import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
 
@@ -36,9 +36,9 @@ public class AMQPSession implements ShutdownListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQPSession.class);
   private final Properties properties;
-  private Connection connection;
-  private Channel publishChannel;
-  private Channel consumeChannel;
+  private volatile Connection connection;
+  private volatile Channel publishChannel;
+  private volatile Channel consumeChannel;
   private volatile int failureCount = 0;
 
   @Inject
@@ -91,7 +91,8 @@ public class AMQPSession implements ShutdownListener {
         connection.addShutdownListener(this);
         LOGGER.info("Connection established.");
       }
-      setUp();
+      //TODO: Consume review
+      // setupConsumer();
     } catch (URISyntaxException ex) {
       LOGGER.error("URI syntax error: {}", properties.getString(Keys.AMQP_URI));
     } catch (IOException ex) {
@@ -101,7 +102,9 @@ public class AMQPSession implements ShutdownListener {
     }
   }
 
-  private void setUp() {
+//TODO: Consume review
+/*
+  private void setupConsumer() {
     if (connection != null) {
       if (properties.getBoolean(Keys.QUEUE_CONSUME)) {
         if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
@@ -111,6 +114,7 @@ public class AMQPSession implements ShutdownListener {
       LOGGER.info("Complete to setup channel.");
     }
   }
+*/
 
   public void disconnect() {
     LOGGER.info("Disconnecting...");
@@ -143,6 +147,8 @@ public class AMQPSession implements ShutdownListener {
     }
   }
 
+// TODO: Consume review.
+/*
   public void consumeMessage() {
     if (consumeChannel == null || !consumeChannel.isOpen()) {
       consumeChannel = getChannel();
@@ -159,7 +165,7 @@ public class AMQPSession implements ShutdownListener {
       }
     }
   }
-
+*/
   @Override
   public void shutdownCompleted(ShutdownSignalException exception) {
     Object obj = exception.getReference();
@@ -179,6 +185,8 @@ public class AMQPSession implements ShutdownListener {
     }
   }
 
+// TODO: Consume review.
+/*
   public class MessageConsumer extends DefaultConsumer {
 
     public MessageConsumer(Channel channel) {
@@ -205,4 +213,5 @@ public class AMQPSession implements ShutdownListener {
       }
     }
   }
+*/
 }

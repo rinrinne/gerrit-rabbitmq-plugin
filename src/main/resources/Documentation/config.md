@@ -8,9 +8,6 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
     uri = amqp://localhost
     username = guest
     password = guest
-  [queue]
-    name = gerrit-queue
-    consume = false
   [exchange]
     name = exchange-for-gerrit-queue
   [message]
@@ -35,12 +32,6 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
 
 * `amqp.password`
     * Password for RabbitMQ connection authentication.
-
-* `queue.name`
-    * The name of queue.
-
-* `queue.consume`
-    * true if consume messages in queue.
 
 * `exchange.name`
     * The name of exchange.
@@ -92,8 +83,6 @@ You can change the below values by specifying them in `rabbitmq.config`.
 |amqp.uri             | **amqp://localhost**
 |amqp.username        | **guest**
 |amqp.password        | **guest**
-|queue.name           | **gerrit.events**
-|queue.consume        | false
 |exchange.name        | **gerrit.publish**
 |message.deliveryMode | 1
 |message.priority     | 0
