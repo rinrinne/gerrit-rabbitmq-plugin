@@ -24,13 +24,13 @@ version = '1.5-SNAPSHOT'
 jar {
   manifest {
     attributes(
-      'Gerrit-PluginName': name, 
+      'Gerrit-PluginName': project.name,
       'Gerrit-ApiType': apiType,
       'Gerrit-ApiVersion': apiVersion,
       'Gerrit-Module': 'com.googlesource.gerrit.plugins.rabbitmq.Module',
       'Implementation-Vendor': 'rinrinne',
       'Implementation-URL': 'https://github.com/rinrinne/gerrit-rabbitmq-plugin',
-      'Implementation-Title': "${apiType} ${name}",
+      'Implementation-Title': "${apiType} ${project.name}",
       'Implementation-Version' : version,
       'Created-By': 'rinrinne (rinrin.ne@gmail.com)'
     )
