@@ -14,12 +14,10 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq;
 
-import com.google.gerrit.common.Version;
-import com.google.gerrit.server.config.GerritServerConfig;
-import com.google.gerrit.server.config.SitePaths;
-import com.google.inject.Inject;
-
-import com.rabbitmq.client.AMQP;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.lang.StringUtils;
@@ -30,10 +28,11 @@ import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.gerrit.common.Version;
+import com.google.gerrit.server.config.GerritServerConfig;
+import com.google.gerrit.server.config.SitePaths;
+import com.google.inject.Inject;
+import com.rabbitmq.client.AMQP;
 
 public class Properties {
 
@@ -98,6 +97,15 @@ public class Properties {
 
   public String getGerritFrontUrl() {
     return StringUtils.stripToEmpty(config.getString(Keys.GERRIT_FRONT_URL.section, null, Keys.GERRIT_FRONT_URL.name));
+  }
+
+  public boolean hasAuthUser() {
+    return !getAuthUser().isEmpty();
+  }
+
+  public String getAuthUser() {
+    return StringUtils.stripToEmpty(pluginConfig.getString(
+        Keys.SECURITY_AUTHUSER.section, null, Keys.SECURITY_AUTHUSER.name));
   }
 
   public String getGerritVersion() {
