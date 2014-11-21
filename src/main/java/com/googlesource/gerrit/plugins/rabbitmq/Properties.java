@@ -18,7 +18,7 @@ import com.google.gerrit.common.Version;
 import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
-
+import com.google.inject.Singleton;
 import com.rabbitmq.client.AMQP;
 
 import org.apache.commons.codec.CharEncoding;
@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Singleton
 public class Properties {
 
   // TODO: Value will be replaced to "gerrit.event".
@@ -112,7 +113,7 @@ public class Properties {
     return interval;
   }
 
-  public AMQP.BasicProperties getBasicProperties() {
+  public synchronized AMQP.BasicProperties getBasicProperties() {
     if (properties == null) {
       Map<String, Object> headers = new HashMap<String, Object>();
       headers.put(Keys.GERRIT_NAME.key, getString(Keys.GERRIT_NAME));
