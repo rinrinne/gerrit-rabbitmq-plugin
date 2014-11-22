@@ -18,7 +18,7 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
     name = foobar-gerrit
     hostname = www.foobar.com
     scheme = ssh
-    port = 24918
+    port = 29418
   [monitor]
     interval = 15000
     failureCount = 15
