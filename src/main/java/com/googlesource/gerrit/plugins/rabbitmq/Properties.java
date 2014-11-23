@@ -56,6 +56,7 @@ public class Properties {
   public Properties(final SitePaths site, @GerritServerConfig final Config config) {
     this.config = config;
     this.pluginConfig = getPluginConfig(new File(site.etc_dir, CONFIG_FILENAME));
+    this.properties = generateBasicProperties();
   }
 
   public Config getPluginConfig(File cfgPath) {
@@ -113,26 +114,27 @@ public class Properties {
     return interval;
   }
 
-  public synchronized AMQP.BasicProperties getBasicProperties() {
-    if (properties == null) {
-      Map<String, Object> headers = new HashMap<String, Object>();
-      headers.put(Keys.GERRIT_NAME.key, getString(Keys.GERRIT_NAME));
-      headers.put(Keys.GERRIT_HOSTNAME.key, getString(Keys.GERRIT_HOSTNAME));
-      headers.put(Keys.GERRIT_SCHEME.key, getString(Keys.GERRIT_SCHEME));
-      headers.put(Keys.GERRIT_PORT.key, String.valueOf(getInt(Keys.GERRIT_PORT)));
-      headers.put(Keys.GERRIT_FRONT_URL.key, getGerritFrontUrl());
-      headers.put(Keys.GERRIT_VERSION.key, getGerritVersion());
+  private AMQP.BasicProperties generateBasicProperties() {
+    Map<String, Object> headers = new HashMap<String, Object>();
+    headers.put(Keys.GERRIT_NAME.key, getString(Keys.GERRIT_NAME));
+    headers.put(Keys.GERRIT_HOSTNAME.key, getString(Keys.GERRIT_HOSTNAME));
+    headers.put(Keys.GERRIT_SCHEME.key, getString(Keys.GERRIT_SCHEME));
+    headers.put(Keys.GERRIT_PORT.key, String.valueOf(getInt(Keys.GERRIT_PORT)));
+    headers.put(Keys.GERRIT_FRONT_URL.key, getGerritFrontUrl());
+    headers.put(Keys.GERRIT_VERSION.key, getGerritVersion());
 
-      AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
-      builder.appId(EVENT_APPID);
-      builder.contentEncoding(CharEncoding.UTF_8);
-      builder.contentType(CONTENT_TYPE_JSON);
-      builder.deliveryMode(getInt(Keys.MESSAGE_DELIVERY_MODE));
-      builder.priority(getInt(Keys.MESSAGE_PRIORITY));
-      builder.headers(headers);
+    AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
+    builder.appId(EVENT_APPID);
+    builder.contentEncoding(CharEncoding.UTF_8);
+    builder.contentType(CONTENT_TYPE_JSON);
+    builder.deliveryMode(getInt(Keys.MESSAGE_DELIVERY_MODE));
+    builder.priority(getInt(Keys.MESSAGE_PRIORITY));
+    builder.headers(headers);
 
-      properties = builder.build();
-    }
+    return builder.build();
+  }
+
+  public AMQP.BasicProperties getBasicProperties() {
     return properties;
   }
 }
