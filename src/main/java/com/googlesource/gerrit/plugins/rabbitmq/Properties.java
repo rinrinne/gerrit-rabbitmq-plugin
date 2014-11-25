@@ -125,7 +125,7 @@ public class Properties {
   }
 
   private AMQP.BasicProperties generateBasicProperties() {
-    Map<String, Object> headers = new HashMap<String, Object>();
+    Map<String, Object> headers = new HashMap<>();
     headers.put(Keys.GERRIT_NAME.key, getString(Keys.GERRIT_NAME));
     headers.put(Keys.GERRIT_HOSTNAME.key, getString(Keys.GERRIT_HOSTNAME));
     headers.put(Keys.GERRIT_SCHEME.key, getString(Keys.GERRIT_SCHEME));
