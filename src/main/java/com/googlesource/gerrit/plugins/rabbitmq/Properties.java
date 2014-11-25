@@ -86,9 +86,8 @@ public class Properties {
     String val = pluginConfig.getString(key.section, null, key.name);
     if (val == null) {
       return key.defaultVal.toString();
-    } else {
-      return val;
     }
+    return val;
   }
 
   public int getInt(Keys key) {
