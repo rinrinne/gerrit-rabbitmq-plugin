@@ -14,33 +14,72 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq;
 
-import com.google.gerrit.common.ChangeListener;
-import com.google.gerrit.extensions.events.LifecycleListener;
-import com.google.gerrit.server.events.ChangeEvent;
-import com.google.gson.Gson;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import com.google.gerrit.common.ChangeHooks;
+import com.google.gerrit.common.ChangeListener;
+import com.google.gerrit.extensions.events.LifecycleListener;
+import com.google.gerrit.reviewdb.client.Account;
+import com.google.gerrit.reviewdb.server.ReviewDb;
+import com.google.gerrit.server.CurrentUser;
+import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.PluginUser;
+import com.google.gerrit.server.account.AccountResolver;
+import com.google.gerrit.server.events.ChangeEvent;
+import com.google.gerrit.server.git.WorkQueue;
+import com.google.gerrit.server.util.RequestContext;
+import com.google.gerrit.server.util.ThreadLocalRequestContext;
+import com.google.gson.Gson;
+import com.google.gwtorm.server.OrmException;
+import com.google.gwtorm.server.SchemaFactory;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
+import com.google.inject.Singleton;
 
 @Singleton
 public class RabbitMQManager implements ChangeListener, LifecycleListener {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQManager.class);
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(RabbitMQManager.class);
   private final static int MONITOR_FIRSTTIME_DELAY = 15000;
   private final Properties properties;
   private final AMQPSession session;
   private final Gson gson = new Gson();
   private final Timer monitorTimer = new Timer();
+  private final ChangeHooks hooks;
+  private final AccountResolver accountResolver;
+  private final IdentifiedUser.GenericFactory userFactory;
+  private final WorkQueue workQueue;
+  private final ThreadLocalRequestContext threadLocalRequestContext;
+  private final PluginUser pluginUser;
+  private final SchemaFactory<ReviewDb> schemaFactory;
+  private ReviewDb db;
+  private Account userAccount;
 
   @Inject
-  public RabbitMQManager(Properties properties, AMQPSession session) {
+  public RabbitMQManager(Properties properties,
+      AMQPSession session,
+      ChangeHooks hooks,
+      AccountResolver accountResolver,
+      IdentifiedUser.GenericFactory userFactory,
+      WorkQueue workQueue,
+      ThreadLocalRequestContext threadLocalRequestContext,
+      PluginUser pluginUser,
+      SchemaFactory<ReviewDb> schemaFactory) {
     this.properties = properties;
     this.session = session;
+    this.hooks = hooks;
+    this.accountResolver = accountResolver;
+    this.userFactory = userFactory;
+    this.workQueue = workQueue;
+    this.threadLocalRequestContext = threadLocalRequestContext;
+    this.pluginUser = pluginUser;
+    this.schemaFactory = schemaFactory;
   }
 
   @Override
@@ -55,12 +94,68 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
         }
       }
     }, MONITOR_FIRSTTIME_DELAY, properties.getInt(Keys.MONITOR_INTERVAL));
+
+    if (properties.hasAuthUser()) {
+      final String userName = properties.getAuthUser();
+      final ChangeListener changeListener = this;
+      workQueue.getDefaultQueue().submit(new Runnable() {
+        @Override
+        public void run() {
+          RequestContext old = threadLocalRequestContext
+              .setContext(new RequestContext() {
+
+                @Override
+                public CurrentUser getCurrentUser() {
+                  return pluginUser;
+                }
+
+                @Override
+                public Provider<ReviewDb> getReviewDbProvider() {
+                  return new Provider<ReviewDb>() {
+                    @Override
+                    public ReviewDb get() {
+                      if (db == null) {
+                        try {
+                          db = schemaFactory.open();
+                        } catch (OrmException e) {
+                          throw new ProvisionException("Cannot open ReviewDb", e);
+                        }
+                      }
+                      return db;
+                    }
+                  };
+                }
+              });
+          try {
+            userAccount = accountResolver.find(userName);
+            if (userAccount == null) {
+              LOGGER.error("No single user could be found when searching for authUser: "
+                      + userName + '\n');
+              return;
+            }
+
+            IdentifiedUser user = userFactory.create(userAccount.getId());
+            hooks.addChangeListener(changeListener, user);
+          } catch (OrmException e) {
+            LOGGER.error("Could not query database for authUser", e);
+            return;
+          } finally {
+            threadLocalRequestContext.setContext(old);
+            if (db != null) {
+              db.close();
+              db = null;
+            }
+          }
+        }
+      });
+    }
   }
 
   @Override
   public void stop() {
     monitorTimer.cancel();
     session.disconnect();
+    hooks.removeChangeListener(this);
   }
 
   @Override
