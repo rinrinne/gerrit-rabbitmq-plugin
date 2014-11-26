@@ -103,7 +103,7 @@ public class Properties {
     return StringUtils.stripToEmpty(config.getString(Keys.GERRIT_FRONT_URL.section, null, Keys.GERRIT_FRONT_URL.name));
   }
 
-  public boolean hasListernAs() {
+  public boolean hasListenAs() {
     return !getListenAs().isEmpty();
   }
 

@@ -95,7 +95,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
       }
     }, MONITOR_FIRSTTIME_DELAY, properties.getInt(Keys.MONITOR_INTERVAL));
 
-    if (properties.hasListernAs()) {
+    if (properties.hasListenAs()) {
       final String userName = properties.getListenAs();
       final ChangeListener changeListener = this;
       workQueue.getDefaultQueue().submit(new Runnable() {
