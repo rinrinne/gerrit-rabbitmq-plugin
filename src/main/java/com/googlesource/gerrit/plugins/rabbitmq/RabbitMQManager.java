@@ -95,8 +95,8 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
       }
     }, MONITOR_FIRSTTIME_DELAY, properties.getInt(Keys.MONITOR_INTERVAL));
 
-    if (properties.hasAuthUser()) {
-      final String userName = properties.getAuthUser();
+    if (properties.hasListernAs()) {
+      final String userName = properties.getListenAs();
       final ChangeListener changeListener = this;
       workQueue.getDefaultQueue().submit(new Runnable() {
         @Override
@@ -129,15 +129,15 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
           try {
             userAccount = accountResolver.find(userName);
             if (userAccount == null) {
-              LOGGER.error("No single user could be found when searching for authUser: "
-                      + userName + '\n');
+              LOGGER.error("No single user could be found when searching for listenAs: {}", userName);
               return;
             }
 
             IdentifiedUser user = userFactory.create(userAccount.getId());
             hooks.addChangeListener(changeListener, user);
+            LOGGER.info("Listen events as : {}", userName);
           } catch (OrmException e) {
-            LOGGER.error("Could not query database for authUser", e);
+            LOGGER.error("Could not query database for listenAs", e);
             return;
           } finally {
             threadLocalRequestContext.setContext(old);

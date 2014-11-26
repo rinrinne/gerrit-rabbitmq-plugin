@@ -103,13 +103,13 @@ public class Properties {
     return StringUtils.stripToEmpty(config.getString(Keys.GERRIT_FRONT_URL.section, null, Keys.GERRIT_FRONT_URL.name));
   }
 
-  public boolean hasAuthUser() {
-    return !getAuthUser().isEmpty();
+  public boolean hasListernAs() {
+    return !getListenAs().isEmpty();
   }
 
-  public String getAuthUser() {
+  public String getListenAs() {
     return StringUtils.stripToEmpty(pluginConfig.getString(
-        Keys.SECURITY_AUTHUSER.section, null, Keys.SECURITY_AUTHUSER.name));
+        Keys.GERRIT_LISTENAS.section, null, Keys.GERRIT_LISTENAS.name));
   }
 
   public String getGerritVersion() {

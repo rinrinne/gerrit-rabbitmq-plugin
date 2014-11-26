@@ -19,6 +19,7 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
     hostname = www.foobar.com
     scheme = ssh
     port = 29418
+    listenAs = gerrituser
   [monitor]
     interval = 15000
     failureCount = 15
@@ -63,6 +64,10 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
     * The port number of gerrit for SCM connection.
       This can be used for message header only.
 
+* `gerrit.listenAs`
+    * The user of gerrit who listen events.
+      If not specified, listen events as unrestricted user.
+
 * `monitor.interval`
     * The interval time in milliseconds for connection monitor.
       You can specify the value more than 5000.
@@ -91,5 +96,6 @@ You can change the below values by specifying them in `rabbitmq.config`.
 |gerrit.hostname      | *Empty*
 |gerrit.scheme        | **ssh**
 |gerrit.port          | 29418
+|gerrit.listenAs      | *Unrestricted user*
 |monitor.interval     | 15000
 |monitor.failureCount | 15

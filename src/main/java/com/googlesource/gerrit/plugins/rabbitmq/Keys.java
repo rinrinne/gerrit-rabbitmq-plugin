@@ -28,7 +28,7 @@ public enum Keys {
   GERRIT_PORT("gerrit.port", "gerrit-port", 29418),
   GERRIT_FRONT_URL("gerrit.canonicalWebUrl", "gerrit-front-url", ""),
   GERRIT_VERSION("gerrit.version", "gerrit-version", null),
-  SECURITY_AUTHUSER("security.authUser", null, null),
+  GERRIT_LISTENAS("gerrit.listenAs", null, null),
   MONITOR_INTERVAL("monitor.interval", null, 15000),
   MONITOR_FAILURECOUNT("monitor.failureCount", null, 15);
 

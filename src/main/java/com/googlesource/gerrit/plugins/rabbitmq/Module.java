@@ -34,8 +34,8 @@ class Module extends AbstractModule {
     bind(AMQPSession.class);
 //    bind(Properties.class);
     bind(RabbitMQManager.class);
-    if (!properties.hasAuthUser()) {
-      // No authUser to filter events against. Register an unrestricted ChangeListener
+    if (!properties.hasListernAs()) {
+      // No listenAs to filter events against. Register an unrestricted ChangeListener
       DynamicSet.bind(binder(), ChangeListener.class).to(RabbitMQManager.class);
     }
     DynamicSet.bind(binder(), LifecycleListener.class).to(RabbitMQManager.class);
