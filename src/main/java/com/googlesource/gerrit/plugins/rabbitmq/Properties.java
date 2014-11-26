@@ -102,6 +102,15 @@ public class Properties {
     return StringUtils.stripToEmpty(config.getString(Keys.GERRIT_FRONT_URL.section, null, Keys.GERRIT_FRONT_URL.name));
   }
 
+  public boolean hasAuthUser() {
+    return !getAuthUser().isEmpty();
+  }
+
+  public String getAuthUser() {
+    return StringUtils.stripToEmpty(pluginConfig.getString(
+        Keys.SECURITY_AUTHUSER.section, null, Keys.SECURITY_AUTHUSER.name));
+  }
+
   public String getGerritVersion() {
     return StringUtils.stripToEmpty(Version.getVersion());
   }
