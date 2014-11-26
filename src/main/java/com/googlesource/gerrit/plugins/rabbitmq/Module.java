@@ -32,7 +32,7 @@ class Module extends AbstractModule {
   @Override
   protected void configure() {
     bind(AMQPSession.class);
-    bind(Properties.class);
+//    bind(Properties.class);
     bind(RabbitMQManager.class);
     if (!properties.hasAuthUser()) {
       // No authUser to filter events against. Register an unrestricted ChangeListener
