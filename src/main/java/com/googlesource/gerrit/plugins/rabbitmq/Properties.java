@@ -19,6 +19,7 @@ import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import com.rabbitmq.client.AMQP;
 
 import org.apache.commons.codec.CharEncoding;

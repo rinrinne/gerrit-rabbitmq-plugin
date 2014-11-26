@@ -15,6 +15,7 @@
 package com.googlesource.gerrit.plugins.rabbitmq;
 
 import com.google.inject.Inject;
+
 // import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;

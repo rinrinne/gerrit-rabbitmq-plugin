@@ -14,12 +14,6 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gerrit.common.ChangeHooks;
 import com.google.gerrit.common.ChangeListener;
 import com.google.gerrit.extensions.events.LifecycleListener;
@@ -40,6 +34,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Singleton;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Singleton
 public class RabbitMQManager implements ChangeListener, LifecycleListener {
