@@ -39,9 +39,7 @@ import java.util.Map;
 @Singleton
 public class Properties {
 
-  // TODO: Value will be replaced to "gerrit.event".
   public final static String EVENT_APPID = "gerrit";
-  public final static String APPROVE_APPID = "gerrit.approve";
   public final static String CONTENT_TYPE_JSON = "application/json";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
