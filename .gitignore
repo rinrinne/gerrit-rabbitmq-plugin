@@ -7,4 +7,6 @@
 /.checkstyle
 /.project
 /.settings
+/.idea
 /gerrit
+*.iml
