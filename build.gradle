@@ -66,6 +66,7 @@ dependencies {
     [group: 'com.google.code.gson', name: 'gson', version: '2.1'],
     [group: 'commons-lang', name: 'commons-lang', version: '2.5'],
     [group: 'commons-codec', name: 'commons-codec', version: '1.4'],
+    [group: 'commons-io', name: 'commons-io', version: '1.4'],
     [group: 'com.rabbitmq', name: 'amqp-client', version: '3.4.4'],
   )
 }
