@@ -15,15 +15,11 @@
 package com.googlesource.gerrit.plugins.rabbitmq;
 
 import com.google.gerrit.common.Version;
-import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.GerritServerConfig;
-import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
 
-import com.rabbitmq.client.AMQP;
-
-import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Config;
@@ -32,53 +28,77 @@ import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-@Singleton
 public class Properties {
 
-  public final static String EVENT_APPID = "gerrit";
-  public final static String CONTENT_TYPE_JSON = "application/json";
+  interface Factory {
+    Properties create(Path propertiesFile);
+  }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
-  private final static String CONFIG_FILEEXT = ".config";
 
   private final static int MINIMUM_CONNECTION_MONITOR_INTERVAL = 5000;
 
-  private final Config config;
-  private final Config pluginConfig;
-  private AMQP.BasicProperties properties;
+  private final Path propertiesFile;
+  private final Config serverConfig;
+  private final AMQProperties.Factory amqFactory;
+  private Config pluginConfig;
+  private AMQProperties amqProperties;
 
   @Inject
-  public Properties(@PluginName final String pluginName, final SitePaths site, @GerritServerConfig final Config config) {
-    this.config = config;
-    this.pluginConfig = getPluginConfig(new File(site.etc_dir, pluginName + CONFIG_FILEEXT));
-    this.properties = generateBasicProperties();
+  public Properties(
+      @GerritServerConfig final Config serverConfig,
+      final AMQProperties.Factory amqFactory,
+      @Assisted final Path propertiesFile) {
+    this.propertiesFile = propertiesFile;
+    this.serverConfig = serverConfig;
+    this.amqFactory = amqFactory;
   }
 
-  public Config getPluginConfig(File cfgPath) {
-    LOGGER.info("Loading " + cfgPath.toString() + " ...");
-    FileBasedConfig cfg = new FileBasedConfig(cfgPath, FS.DETECTED);
-    if (!cfg.getFile().exists()) {
-      LOGGER.warn("No " + cfg.getFile());
-      return cfg;
-    }
-    if (cfg.getFile().length() == 0) {
-      LOGGER.info("Empty " + cfg.getFile());
-      return cfg;
+  public boolean load() {
+    return load(null);
+  }
+
+  public boolean load(Properties baseProperties) {
+    pluginConfig = new Config();
+    LOGGER.info("Loading {} ...", propertiesFile);
+    if (!Files.exists(propertiesFile)) {
+      LOGGER.warn("No {}", propertiesFile);
+      return false;
     }
 
+    FileBasedConfig cfg;
     try {
+      if (baseProperties != null) {
+        cfg = new FileBasedConfig(baseProperties.getConfig(), propertiesFile.toFile(), FS.DETECTED);
+      } else {
+        cfg = new FileBasedConfig(propertiesFile.toFile(), FS.DETECTED);
+      }
       cfg.load();
     } catch (ConfigInvalidException e) {
-      LOGGER.info("Config file " + cfg.getFile() + " is invalid: " + e.getMessage());
+      LOGGER.info("{} has invalid format: {}", propertiesFile, e.getMessage());
+      return false;
     } catch (IOException e) {
-      LOGGER.info("Cannot read " + cfg.getFile() + ": " + e.getMessage());
+      LOGGER.info("Cannot read {}: {}", propertiesFile, e.getMessage());
+      return false;
     }
-    return cfg;
+    pluginConfig = cfg;
+    return true;
+  }
+
+  public Config getConfig() {
+    return pluginConfig;
+  }
+
+  public Path getPath() {
+    return propertiesFile;
+  }
+
+  public String getName() {
+    return FilenameUtils.removeExtension(propertiesFile.getFileName().toString());
   }
 
   public String getString(Keys key) {
@@ -98,7 +118,8 @@ public class Properties {
   }
 
   public String getGerritFrontUrl() {
-    return StringUtils.stripToEmpty(config.getString(Keys.GERRIT_FRONT_URL.section, null, Keys.GERRIT_FRONT_URL.name));
+    return StringUtils.stripToEmpty(serverConfig.getString(
+        Keys.GERRIT_FRONT_URL.section, null, Keys.GERRIT_FRONT_URL.name));
   }
 
   public boolean hasListenAs() {
@@ -122,27 +143,10 @@ public class Properties {
     return interval;
   }
 
-  private AMQP.BasicProperties generateBasicProperties() {
-    Map<String, Object> headers = new HashMap<>();
-    headers.put(Keys.GERRIT_NAME.key, getString(Keys.GERRIT_NAME));
-    headers.put(Keys.GERRIT_HOSTNAME.key, getString(Keys.GERRIT_HOSTNAME));
-    headers.put(Keys.GERRIT_SCHEME.key, getString(Keys.GERRIT_SCHEME));
-    headers.put(Keys.GERRIT_PORT.key, String.valueOf(getInt(Keys.GERRIT_PORT)));
-    headers.put(Keys.GERRIT_FRONT_URL.key, getGerritFrontUrl());
-    headers.put(Keys.GERRIT_VERSION.key, getGerritVersion());
-
-    AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
-    builder.appId(EVENT_APPID);
-    builder.contentEncoding(CharEncoding.UTF_8);
-    builder.contentType(CONTENT_TYPE_JSON);
-    builder.deliveryMode(getInt(Keys.MESSAGE_DELIVERY_MODE));
-    builder.priority(getInt(Keys.MESSAGE_PRIORITY));
-    builder.headers(headers);
-
-    return builder.build();
-  }
-
-  public AMQP.BasicProperties getBasicProperties() {
-    return properties;
+  public AMQProperties getAMQProperties() {
+    if (amqProperties == null) {
+      amqProperties = amqFactory.create(this);
+    }
+    return amqProperties;
   }
 }

@@ -16,6 +16,8 @@ package com.googlesource.gerrit.plugins.rabbitmq;
 
 import com.google.inject.Inject;
 
+import com.google.inject.assistedinject.Assisted;
+
 // import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -35,16 +37,23 @@ import java.net.URISyntaxException;
 
 public class AMQPSession implements ShutdownListener {
 
+  interface Factory {
+    AMQPSession create(Properties properties);
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQPSession.class);
   private final Properties properties;
   private volatile Connection connection;
-  private volatile Channel publishChannel;
-  private volatile Channel consumeChannel;
+  private volatile Channel channel;
   private volatile int failureCount = 0;
 
   @Inject
-  public AMQPSession(Properties properties) {
+  public AMQPSession(@Assisted Properties properties) {
     this.properties = properties;
+  }
+
+  public Properties getProperties() {
+    return properties;
   }
 
   public boolean isOpen() {
@@ -92,8 +101,6 @@ public class AMQPSession implements ShutdownListener {
         connection.addShutdownListener(this);
         LOGGER.info("Connection established.");
       }
-      //TODO: Consume review
-      // setupConsumer();
     } catch (URISyntaxException ex) {
       LOGGER.error("URI syntax error: {}", properties.getString(Keys.AMQP_URI));
     } catch (IOException ex) {
@@ -102,20 +109,6 @@ public class AMQPSession implements ShutdownListener {
       LOGGER.warn("Connection has something error. it will be disposed.", ex);
     }
   }
-
-//TODO: Consume review
-/*
-  private void setupConsumer() {
-    if (connection != null) {
-      if (properties.getBoolean(Keys.QUEUE_CONSUME)) {
-        if (StringUtils.isNotEmpty(properties.getString(Keys.QUEUE_NAME))) {
-          consumeMessage();
-        }
-      }
-      LOGGER.info("Complete to setup channel.");
-    }
-  }
-*/
 
   public void disconnect() {
     LOGGER.info("Disconnecting...");
@@ -127,20 +120,20 @@ public class AMQPSession implements ShutdownListener {
       LOGGER.warn("Error when close connection." , ex);
     } finally {
       connection = null;
-      publishChannel = null;
+      channel = null;
     }
   }
 
   public void publishMessage(String message) {
-    if (publishChannel == null || !publishChannel.isOpen()) {
-      publishChannel = getChannel();
+    if (channel == null || !channel.isOpen()) {
+      channel = getChannel();
     }
-    if (publishChannel != null && publishChannel.isOpen()) {
+    if (channel != null && channel.isOpen()) {
       try {
         LOGGER.debug("Send message.");
-        publishChannel.basicPublish(properties.getString(Keys.EXCHANGE_NAME),
+        channel.basicPublish(properties.getString(Keys.EXCHANGE_NAME),
             properties.getString(Keys.MESSAGE_ROUTINGKEY),
-            properties.getBasicProperties(),
+            properties.getAMQProperties().getBasicProperties(),
             message.getBytes(CharEncoding.UTF_8));
       } catch (Exception ex) {
         LOGGER.warn("Error when sending meessage.", ex);
@@ -148,71 +141,19 @@ public class AMQPSession implements ShutdownListener {
     }
   }
 
-// TODO: Consume review.
-/*
-  public void consumeMessage() {
-    if (consumeChannel == null || !consumeChannel.isOpen()) {
-      consumeChannel = getChannel();
-    }
-    if (consumeChannel != null && consumeChannel.isOpen()) {
-      try {
-        consumeChannel.basicConsume(
-            properties.getString(Keys.QUEUE_NAME),
-            false,
-            new MessageConsumer(consumeChannel));
-        LOGGER.debug("Start consuming message.");
-      } catch (Exception ex) {
-        LOGGER.warn("Error when consuming message.", ex);
-      }
-    }
-  }
-*/
   @Override
   public void shutdownCompleted(ShutdownSignalException exception) {
     Object obj = exception.getReference();
 
     if (obj instanceof Channel) {
       Channel ch = (Channel) obj;
-      if (ch.equals(publishChannel)) {
+      if (ch.equals(channel)) {
         LOGGER.info("Publish channel closed.");
-        publishChannel = null;
-      } else if (ch.equals(consumeChannel)) {
-        LOGGER.info("Consume channel closed.");
-        consumeChannel = null;
+        channel = null;
       }
     } else if (obj instanceof Connection) {
       LOGGER.info("Connection disconnected.");
       connection = null;
     }
   }
-
-// TODO: Consume review.
-/*
-  public class MessageConsumer extends DefaultConsumer {
-
-    public MessageConsumer(Channel channel) {
-        super(channel);
-    }
-
-    @Override
-    public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties props, byte[] body)
-            throws IOException {
-      try {
-        long deliveryTag = envelope.getDeliveryTag();
-
-        if (Properties.APPROVE_APPID.equals(props.getAppId()) &&
-            Properties.CONTENT_TYPE_JSON.equals(props.getContentType())) {
-          // TODO: Get message then input as review. required 2.9 or later.
-        }
-
-        getChannel().basicAck(deliveryTag, false);
-
-      } catch (IOException ex) {
-        throw ex;
-      } catch (RuntimeException ex) {
-        LOGGER.warn("caught exception in delivery handler", ex);
-      }
-    }
-  }
-*/
 }

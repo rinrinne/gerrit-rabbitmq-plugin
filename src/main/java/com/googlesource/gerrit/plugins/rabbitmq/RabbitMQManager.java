@@ -21,39 +21,55 @@ import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Singleton
 public class RabbitMQManager implements LifecycleListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQManager.class);
-  private final MessagePublisher messagePublisher;
   private final DefaultMessagePublisher defaultMessagePublisher;
-  private final Properties properties;
+  private final MessagePublisher.Factory publisherFactory;
+  private final AMQPSession.Factory sessionFactory;
+  private final PropertiesStore propertiesStore;
+  private final BCSolver bcSolver;
+  private final List<MessagePublisher> publisherList = new ArrayList<>();
 
   @Inject
   public RabbitMQManager(
-      MessagePublisher messagePublisher,
       DefaultMessagePublisher defaultMessagePublisher,
-      Properties properties) {
-    this.messagePublisher = messagePublisher;
+      MessagePublisher.Factory publisherFactory,
+      AMQPSession.Factory sessionFactory,
+      PropertiesStore propertiesStore,
+      BCSolver bcSolver) {
     this.defaultMessagePublisher = defaultMessagePublisher;
-    this.properties = properties;
+    this.publisherFactory = publisherFactory;
+    this.sessionFactory = sessionFactory;
+    this.propertiesStore = propertiesStore;
+    this.bcSolver = bcSolver;
   }
 
   @Override
   public void start() {
-    if (properties.hasListenAs()) {
-      messagePublisher.start();
-    } else {
-      defaultMessagePublisher.start();
+    bcSolver.solve();
+    propertiesStore.load();
+    for (Properties properties : propertiesStore) {
+      AMQPSession session = sessionFactory.create(properties);
+      if (properties.hasListenAs()) {
+        MessagePublisher publisher = publisherFactory.create(session);
+        publisher.start();
+        publisherList.add(publisher);
+      } else {
+        defaultMessagePublisher.addSession(session);
+      }
     }
   }
 
   @Override
   public void stop() {
-    if (properties.hasListenAs()) {
-      messagePublisher.stop();
-    } else {
-      defaultMessagePublisher.stop();
+    for (MessagePublisher publisher : publisherList) {
+      publisher.stop();
     }
+    publisherList.clear();
   }
 }

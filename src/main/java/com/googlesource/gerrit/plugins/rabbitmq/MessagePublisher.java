@@ -33,7 +33,7 @@ import com.google.gwtorm.server.SchemaFactory;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
-import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +41,16 @@ import org.slf4j.LoggerFactory;
 import java.util.Timer;
 import java.util.TimerTask;
 
-@Singleton
 public class MessagePublisher implements ChangeListener, LifecycleListener {
+
+  interface Factory {
+    MessagePublisher create(AMQPSession session);
+  }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MessagePublisher.class);
 
   private final static int MONITOR_FIRSTTIME_DELAY = 15000;
 
-  private final Properties properties;
   private final AMQPSession session;
   private final ChangeHooks hooks;
   private final Gson gson;
@@ -64,8 +66,7 @@ public class MessagePublisher implements ChangeListener, LifecycleListener {
 
   @Inject
   public MessagePublisher(
-      Properties properties,
-      AMQPSession session,
+      @Assisted AMQPSession session,
       ChangeHooks hooks,
       Gson gson,
       WorkQueue workQueue,
@@ -74,7 +75,6 @@ public class MessagePublisher implements ChangeListener, LifecycleListener {
       ThreadLocalRequestContext threadLocalRequestContext,
       PluginUser pluginUser,
       SchemaFactory<ReviewDb> schemaFactory) {
-    this.properties = properties;
     this.session = session;
     this.hooks = hooks;
     this.gson = gson;
@@ -98,10 +98,10 @@ public class MessagePublisher implements ChangeListener, LifecycleListener {
           session.connect();
         }
       }
-    }, MONITOR_FIRSTTIME_DELAY, properties.getInt(Keys.MONITOR_INTERVAL));
+    }, MONITOR_FIRSTTIME_DELAY, session.getProperties().getInt(Keys.MONITOR_INTERVAL));
 
-    if (properties.hasListenAs()) {
-      final String userName = properties.getListenAs();
+    if (session.getProperties().hasListenAs()) {
+      final String userName = session.getProperties().getListenAs();
       final ChangeListener changeListener = this;
       workQueue.getDefaultQueue().submit(new Runnable() {
         @Override

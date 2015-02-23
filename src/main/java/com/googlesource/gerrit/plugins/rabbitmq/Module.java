@@ -18,17 +18,25 @@ import com.google.gerrit.common.ChangeListener;
 import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.inject.AbstractModule;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 class Module extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(AMQPSession.class);
-    bind(Properties.class);
-    bind(MessagePublisher.class);
+    install(new FactoryModuleBuilder().build(Properties.Factory.class));
+    install(new FactoryModuleBuilder().build(AMQProperties.Factory.class));
+    install(new FactoryModuleBuilder().build(AMQPSession.Factory.class));
+    install(new FactoryModuleBuilder().build(MessagePublisher.Factory.class));
+    bind(PropertiesStore.class);
+    bind(BCSolver.class);
+//    bind(AMQPSession.class);
+//    bind(Properties.class);
+//    bind(MessagePublisher.class);
     bind(DefaultMessagePublisher.class);
     bind(RabbitMQManager.class);
     DynamicSet.bind(binder(), LifecycleListener.class).to(RabbitMQManager.class);
+    DynamicSet.bind(binder(), LifecycleListener.class).to(DefaultMessagePublisher.class);
     DynamicSet.bind(binder(), ChangeListener.class).to(DefaultMessagePublisher.class);
   }
 }
