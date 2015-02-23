@@ -18,26 +18,17 @@ import com.google.gerrit.common.ChangeListener;
 import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 
 class Module extends AbstractModule {
-
-  private final Properties properties;
-
-  @Inject
-  public Module(Properties properties) {
-    this.properties = properties;
-  }
 
   @Override
   protected void configure() {
     bind(AMQPSession.class);
-//    bind(Properties.class);
+    bind(Properties.class);
+    bind(MessagePublisher.class);
+    bind(DefaultMessagePublisher.class);
     bind(RabbitMQManager.class);
-    if (!properties.hasListenAs()) {
-      // No listenAs to filter events against. Register an unrestricted ChangeListener
-      DynamicSet.bind(binder(), ChangeListener.class).to(RabbitMQManager.class);
-    }
     DynamicSet.bind(binder(), LifecycleListener.class).to(RabbitMQManager.class);
+    DynamicSet.bind(binder(), ChangeListener.class).to(DefaultMessagePublisher.class);
   }
 }
