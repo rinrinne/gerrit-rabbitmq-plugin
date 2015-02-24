@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googlesource.gerrit.plugins.rabbitmq;
+package com.googlesource.gerrit.plugins.rabbitmq.session;
 
 import com.google.inject.Inject;
-
 import com.google.inject.assistedinject.Assisted;
 
+import com.googlesource.gerrit.plugins.rabbitmq.Keys;
+import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
 // import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -37,7 +38,7 @@ import java.net.URISyntaxException;
 
 public class AMQPSession implements ShutdownListener {
 
-  interface Factory {
+  public interface Factory {
     AMQPSession create(Properties properties);
   }
 

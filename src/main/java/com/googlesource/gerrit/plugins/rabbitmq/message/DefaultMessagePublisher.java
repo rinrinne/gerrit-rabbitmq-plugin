@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googlesource.gerrit.plugins.rabbitmq;
+package com.googlesource.gerrit.plugins.rabbitmq.message;
 
 import com.google.gerrit.common.ChangeListener;
 import com.google.gerrit.extensions.events.LifecycleListener;
@@ -20,6 +20,9 @@ import com.google.gerrit.server.events.ChangeEvent;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import com.googlesource.gerrit.plugins.rabbitmq.Keys;
+import com.googlesource.gerrit.plugins.rabbitmq.session.AMQPSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

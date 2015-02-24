@@ -19,6 +19,8 @@ import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

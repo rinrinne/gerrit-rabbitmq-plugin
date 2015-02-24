@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googlesource.gerrit.plugins.rabbitmq;
+package com.googlesource.gerrit.plugins.rabbitmq.message;
 
 import com.google.gerrit.common.ChangeHooks;
 import com.google.gerrit.common.ChangeListener;
@@ -35,6 +35,9 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.assistedinject.Assisted;
 
+import com.googlesource.gerrit.plugins.rabbitmq.Keys;
+import com.googlesource.gerrit.plugins.rabbitmq.session.AMQPSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +46,7 @@ import java.util.TimerTask;
 
 public class MessagePublisher implements ChangeListener, LifecycleListener {
 
-  interface Factory {
+  public interface Factory {
     MessagePublisher create(AMQPSession session);
   }
 

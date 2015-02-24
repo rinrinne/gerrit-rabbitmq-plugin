@@ -20,6 +20,13 @@ import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 
+import com.googlesource.gerrit.plugins.rabbitmq.config.AMQProperties;
+import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+import com.googlesource.gerrit.plugins.rabbitmq.message.DefaultMessagePublisher;
+import com.googlesource.gerrit.plugins.rabbitmq.message.MessagePublisher;
+import com.googlesource.gerrit.plugins.rabbitmq.session.AMQPSession;
+import com.googlesource.gerrit.plugins.rabbitmq.solver.BCSolver;
+
 class Module extends AbstractModule {
 
   @Override

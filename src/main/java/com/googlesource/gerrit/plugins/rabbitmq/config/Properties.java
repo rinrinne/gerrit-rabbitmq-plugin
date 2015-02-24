@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googlesource.gerrit.plugins.rabbitmq;
+package com.googlesource.gerrit.plugins.rabbitmq.config;
 
 import com.google.gerrit.common.Version;
 import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+
+import com.googlesource.gerrit.plugins.rabbitmq.Keys;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +36,7 @@ import java.nio.file.Path;
 
 public class Properties {
 
-  interface Factory {
+  public interface Factory {
     Properties create(Path propertiesFile);
   }
 

@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.googlesource.gerrit.plugins.rabbitmq;
+package com.googlesource.gerrit.plugins.rabbitmq.solver;
 
 import static com.googlesource.gerrit.plugins.rabbitmq.PropertiesStore.FILE_EXT;
 import static com.googlesource.gerrit.plugins.rabbitmq.PropertiesStore.SITE_DIR;
@@ -57,7 +57,7 @@ public class BCSolver {
    * new : data/rabbitmq/rabbitmq.config
    *       data/rabbitmq/site/default.config
    */
-  void solve() {
+  public void solve() {
     try {
       Path oldFile = etcDir.resolve(pluginName + FILE_EXT);
       Path newFile = pluginDataDir.resolve(pluginName + FILE_EXT);

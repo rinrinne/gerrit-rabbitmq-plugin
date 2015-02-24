@@ -18,6 +18,12 @@ import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+import com.googlesource.gerrit.plugins.rabbitmq.message.DefaultMessagePublisher;
+import com.googlesource.gerrit.plugins.rabbitmq.message.MessagePublisher;
+import com.googlesource.gerrit.plugins.rabbitmq.session.AMQPSession;
+import com.googlesource.gerrit.plugins.rabbitmq.solver.BCSolver;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

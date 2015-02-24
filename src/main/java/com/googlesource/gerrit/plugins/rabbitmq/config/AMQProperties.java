@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googlesource.gerrit.plugins.rabbitmq;
+package com.googlesource.gerrit.plugins.rabbitmq.config;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import com.googlesource.gerrit.plugins.rabbitmq.Keys;
 import com.rabbitmq.client.AMQP;
 
 import org.apache.commons.codec.CharEncoding;
@@ -28,7 +29,7 @@ import java.util.Map;
 
 public class AMQProperties {
 
-  interface Factory {
+  public interface Factory {
     AMQProperties create(Properties properties);
   }
 
