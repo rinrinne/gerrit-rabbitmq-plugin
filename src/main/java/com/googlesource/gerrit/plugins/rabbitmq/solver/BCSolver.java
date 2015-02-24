@@ -27,11 +27,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@Singleton
-public class BCSolver {
+public class BCSolver implements Solver {
 
   private final static String DEFAULT_SITE_NAME = "default";
   private static final Logger LOGGER = LoggerFactory.getLogger(BCSolver.class);
@@ -66,8 +66,7 @@ public class BCSolver {
       Files.createDirectories(siteDir);
       Files.move(oldFile, newFile);
       Files.createFile(siteDir.resolve(DEFAULT_SITE_NAME + FILE_EXT));
-    } catch (IOException iex) {
-      LOGGER.warn("{}", iex);
+    } catch (Exception ex) {
     }
   }
 }

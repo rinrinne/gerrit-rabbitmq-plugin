@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googlesource.gerrit.plugins.rabbitmq.session;
+package com.googlesource.gerrit.plugins.rabbitmq.session.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import com.googlesource.gerrit.plugins.rabbitmq.Keys;
 import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+import com.googlesource.gerrit.plugins.rabbitmq.session.Session;
 // import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -30,17 +31,14 @@ import com.rabbitmq.client.ShutdownSignalException;
 
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public class AMQPSession implements ShutdownListener {
-
-  public interface Factory {
-    AMQPSession create(Properties properties);
-  }
+public final class AMQPSession implements Session, ShutdownListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQPSession.class);
   private final Properties properties;
@@ -53,10 +51,16 @@ public class AMQPSession implements ShutdownListener {
     this.properties = properties;
   }
 
+  private String MSG(String msg) {
+    return String.format("[%s] %s", properties.getName(), msg);
+  }
+
+  @Override
   public Properties getProperties() {
     return properties;
   }
 
+  @Override
   public boolean isOpen() {
     if (connection != null) {
       return true;
@@ -68,17 +72,17 @@ public class AMQPSession implements ShutdownListener {
     Channel ch = null;
     if (connection == null) {
       connect();
-    }
-    if (connection != null) {
+    } else {
       try {
         ch = connection.createChannel();
         ch.addShutdownListener(this);
         failureCount = 0;
+        LOGGER.info(MSG("Publish channel opened."));
       } catch (Exception ex) {
-        LOGGER.warn("Failed to open publish channel.");
+        LOGGER.warn(MSG("Failed to open publish channel."));
         failureCount++;
       }
-      if (failureCount > properties.getInt(Keys.MONITOR_FAILURECOUNT)) {
+      if (failureCount > properties.getConnectionMonitorInterval()) {
         LOGGER.warn("Connection has something wrong. So will be disconnected.");
         disconnect();
       }
@@ -86,8 +90,13 @@ public class AMQPSession implements ShutdownListener {
     return ch;
   }
 
+  @Override
   public void connect() {
-    LOGGER.info("Connect to {}...", properties.getString(Keys.AMQP_URI));
+    if (connection != null && connection.isOpen()) {
+      LOGGER.info(MSG("Already connected."));
+      return;
+    }
+    LOGGER.info(MSG("Connect to {}..."), properties.getString(Keys.AMQP_URI));
     ConnectionFactory factory = new ConnectionFactory();
     try {
       if (StringUtils.isNotEmpty(properties.getString(Keys.AMQP_URI))) {
@@ -100,44 +109,46 @@ public class AMQPSession implements ShutdownListener {
         }
         connection = factory.newConnection();
         connection.addShutdownListener(this);
-        LOGGER.info("Connection established.");
+        LOGGER.info(MSG("Connection established."));
       }
     } catch (URISyntaxException ex) {
-      LOGGER.error("URI syntax error: {}", properties.getString(Keys.AMQP_URI));
+      LOGGER.error(MSG("URI syntax error: {}"), properties.getString(Keys.AMQP_URI));
     } catch (IOException ex) {
-      LOGGER.error("Connection cannot be opened.");
+      LOGGER.error(MSG("Connection cannot be opened."));
     } catch (Exception ex) {
-      LOGGER.warn("Connection has something error. it will be disposed.", ex);
+      LOGGER.warn(MSG("Connection has something error. it will be disposed."), ex);
     }
   }
 
+  @Override
   public void disconnect() {
-    LOGGER.info("Disconnecting...");
+    LOGGER.info(MSG("Disconnecting..."));
     try {
       if (connection != null) {
         connection.close();
       }
     } catch (Exception ex) {
-      LOGGER.warn("Error when close connection." , ex);
+      LOGGER.warn(MSG("Error when close connection.") , ex);
     } finally {
       connection = null;
       channel = null;
     }
   }
 
-  public void publishMessage(String message) {
+  @Override
+  public void publish(String message) {
     if (channel == null || !channel.isOpen()) {
       channel = getChannel();
     }
     if (channel != null && channel.isOpen()) {
       try {
-        LOGGER.debug("Send message.");
+        LOGGER.debug(MSG("Send message."));
         channel.basicPublish(properties.getString(Keys.EXCHANGE_NAME),
             properties.getString(Keys.MESSAGE_ROUTINGKEY),
             properties.getAMQProperties().getBasicProperties(),
             message.getBytes(CharEncoding.UTF_8));
       } catch (Exception ex) {
-        LOGGER.warn("Error when sending meessage.", ex);
+        LOGGER.warn(MSG("Error when sending meessage."), ex);
       }
     }
   }
@@ -149,11 +160,11 @@ public class AMQPSession implements ShutdownListener {
     if (obj instanceof Channel) {
       Channel ch = (Channel) obj;
       if (ch.equals(channel)) {
-        LOGGER.info("Publish channel closed.");
+        LOGGER.info(MSG("Publish channel closed."));
         channel = null;
       }
     } else if (obj instanceof Connection) {
-      LOGGER.info("Connection disconnected.");
+      LOGGER.info(MSG("Connection disconnected."));
       connection = null;
     }
   }

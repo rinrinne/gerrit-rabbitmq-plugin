@@ -16,11 +16,14 @@ package com.googlesource.gerrit.plugins.rabbitmq;
 
 import com.google.gerrit.extensions.annotations.PluginData;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+import com.googlesource.gerrit.plugins.rabbitmq.config.internal.GerritFrontUrl;
 
+import org.eclipse.jgit.lib.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,29 +48,29 @@ public class PropertiesStore extends AbstractList<Properties> {
   private final List<Properties> propertiesStore;
   private final String pluginName;
   private final Path pluginDataDir;
-  private final Properties.Factory propFactory;
+  private final Config serverConfig;
 
   @Inject
   public PropertiesStore(
       @PluginName final String pluginName,
       @PluginData final File pluginData,
-      final Properties.Factory propFactory
-      ) {
+      @GerritServerConfig final Config serverConfig) {
     this.propertiesStore = new ArrayList<>();
     this.pluginName = pluginName;
     this.pluginDataDir = pluginData.toPath();
-    this.propFactory = propFactory;
+    this.serverConfig = serverConfig;
   }
 
   public void load() {
     // Load base
-    Properties base = propFactory.create(pluginDataDir.resolve(pluginName + FILE_EXT));
+    Properties base = new Properties(pluginDataDir.resolve(pluginName + FILE_EXT));
     base.load();
+    ((GerritFrontUrl)base).setGerritFrontUrlFromConfig(serverConfig);
 
     // Load site
     try (DirectoryStream<Path> ds = Files.newDirectoryStream(pluginDataDir.resolve(SITE_DIR), "*" + FILE_EXT)) {
       for (Path configFile : ds) {
-        Properties site = propFactory.create(configFile);
+        Properties site = new Properties(configFile);
         if (site.load(base)) {
           propertiesStore.add(site);
         }

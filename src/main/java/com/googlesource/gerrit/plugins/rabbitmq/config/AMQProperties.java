@@ -14,9 +14,6 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq.config;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import com.googlesource.gerrit.plugins.rabbitmq.Keys;
 import com.rabbitmq.client.AMQP;
 
@@ -29,10 +26,6 @@ import java.util.Map;
 
 public class AMQProperties {
 
-  public interface Factory {
-    AMQProperties create(Properties properties);
-  }
-
   public final static String EVENT_APPID = "gerrit";
   public final static String CONTENT_TYPE_JSON = "application/json";
 
@@ -41,8 +34,7 @@ public class AMQProperties {
   private final Properties properties;
   private AMQP.BasicProperties amqpProperties;
 
-  @Inject
-  public AMQProperties(@Assisted Properties properties) {
+  public AMQProperties(Properties properties) {
     this.properties = properties;
   }
 

@@ -19,10 +19,16 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
-import com.googlesource.gerrit.plugins.rabbitmq.message.DefaultMessagePublisher;
+import com.googlesource.gerrit.plugins.rabbitmq.message.DefaultChangeListener;
+import com.googlesource.gerrit.plugins.rabbitmq.message.IdentifiedChangeListener;
 import com.googlesource.gerrit.plugins.rabbitmq.message.MessagePublisher;
-import com.googlesource.gerrit.plugins.rabbitmq.session.AMQPSession;
+import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
+import com.googlesource.gerrit.plugins.rabbitmq.message.PublisherFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.session.Session;
+import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.BCSolver;
+import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
+import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,47 +40,54 @@ import java.util.List;
 public class RabbitMQManager implements LifecycleListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQManager.class);
-  private final DefaultMessagePublisher defaultMessagePublisher;
-  private final MessagePublisher.Factory publisherFactory;
-  private final AMQPSession.Factory sessionFactory;
+  private final DefaultChangeListener defaultChangeListener;
+  private final IdentifiedChangeListener identifiedChangeListener;
+  private final PublisherFactory publisherFactory;
   private final PropertiesStore propertiesStore;
-  private final BCSolver bcSolver;
-  private final List<MessagePublisher> publisherList = new ArrayList<>();
+  private final SolverFactory solverFactory;
+  private final List<Publisher> publisherList = new ArrayList<>();
 
   @Inject
   public RabbitMQManager(
-      DefaultMessagePublisher defaultMessagePublisher,
-      MessagePublisher.Factory publisherFactory,
-      AMQPSession.Factory sessionFactory,
+      DefaultChangeListener defaultChangeListener,
+      IdentifiedChangeListener identifiedChangeListener,
+      PublisherFactory publisherFactory,
       PropertiesStore propertiesStore,
-      BCSolver bcSolver) {
-    this.defaultMessagePublisher = defaultMessagePublisher;
+      SolverFactory solverFactory) {
+    this.defaultChangeListener = defaultChangeListener;
+    this.identifiedChangeListener = identifiedChangeListener;
     this.publisherFactory = publisherFactory;
-    this.sessionFactory = sessionFactory;
     this.propertiesStore = propertiesStore;
-    this.bcSolver = bcSolver;
+    this.solverFactory = solverFactory;
   }
 
   @Override
   public void start() {
-    bcSolver.solve();
+    Solver solver = solverFactory.create();
+    solver.solve();
+
     propertiesStore.load();
     for (Properties properties : propertiesStore) {
-      AMQPSession session = sessionFactory.create(properties);
+      Publisher publisher = publisherFactory.create(properties);
+      publisher.start();
       if (properties.hasListenAs()) {
-        MessagePublisher publisher = publisherFactory.create(session);
-        publisher.start();
-        publisherList.add(publisher);
+        identifiedChangeListener.addPublisher(publisher, properties.getListenAs());
       } else {
-        defaultMessagePublisher.addSession(session);
+        defaultChangeListener.addPublisher(publisher);
       }
+      publisherList.add(publisher);
     }
   }
 
   @Override
   public void stop() {
-    for (MessagePublisher publisher : publisherList) {
+    for (Publisher publisher : publisherList) {
       publisher.stop();
+      if (publisher.getSession().getProperties().hasListenAs()) {
+        identifiedChangeListener.removePublisher(publisher);
+      } else {
+        defaultChangeListener.removePublisher(publisher);
+      }
     }
     publisherList.clear();
   }

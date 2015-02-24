@@ -15,11 +15,9 @@
 package com.googlesource.gerrit.plugins.rabbitmq.config;
 
 import com.google.gerrit.common.Version;
-import com.google.gerrit.server.config.GerritServerConfig;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 
 import com.googlesource.gerrit.plugins.rabbitmq.Keys;
+import com.googlesource.gerrit.plugins.rabbitmq.config.internal.GerritFrontUrl;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,37 +32,25 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class Properties {
-
-  public interface Factory {
-    Properties create(Path propertiesFile);
-  }
+public class Properties implements GerritFrontUrl {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
 
   private final static int MINIMUM_CONNECTION_MONITOR_INTERVAL = 5000;
 
   private final Path propertiesFile;
-  private final Config serverConfig;
-  private final AMQProperties.Factory amqFactory;
   private Config pluginConfig;
   private AMQProperties amqProperties;
 
-  @Inject
-  public Properties(
-      @GerritServerConfig final Config serverConfig,
-      final AMQProperties.Factory amqFactory,
-      @Assisted final Path propertiesFile) {
+  public Properties(final Path propertiesFile) {
     this.propertiesFile = propertiesFile;
-    this.serverConfig = serverConfig;
-    this.amqFactory = amqFactory;
   }
 
   public boolean load() {
     return load(null);
   }
 
-  public boolean load(Properties baseProperties) {
+  public boolean load(final Properties baseProperties) {
     pluginConfig = new Config();
     LOGGER.info("Loading {} ...", propertiesFile);
     if (!Files.exists(propertiesFile)) {
@@ -120,7 +106,7 @@ public class Properties {
   }
 
   public String getGerritFrontUrl() {
-    return StringUtils.stripToEmpty(serverConfig.getString(
+    return StringUtils.stripToEmpty(pluginConfig.getString(
         Keys.GERRIT_FRONT_URL.section, null, Keys.GERRIT_FRONT_URL.name));
   }
 
@@ -147,8 +133,17 @@ public class Properties {
 
   public AMQProperties getAMQProperties() {
     if (amqProperties == null) {
-      amqProperties = amqFactory.create(this);
+      amqProperties = new AMQProperties(this);
     }
     return amqProperties;
+  }
+
+  @Override
+  public void setGerritFrontUrlFromConfig(Config config) {
+    if (pluginConfig != null) {
+      pluginConfig.setString(
+        Keys.GERRIT_FRONT_URL.section, null, Keys.GERRIT_FRONT_URL.name,
+        config.getString(Keys.GERRIT_FRONT_URL.section, null, Keys.GERRIT_FRONT_URL.name));
+    }
   }
 }
