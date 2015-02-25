@@ -14,7 +14,7 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq;
 
-import com.google.gerrit.common.ChangeListener;
+import com.google.gerrit.common.EventListener;
 import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.inject.AbstractModule;
@@ -36,7 +36,7 @@ class Module extends AbstractModule {
     bind(RabbitMQManager.class);
     if (!properties.hasListenAs()) {
       // No listenAs to filter events against. Register an unrestricted ChangeListener
-      DynamicSet.bind(binder(), ChangeListener.class).to(RabbitMQManager.class);
+      DynamicSet.bind(binder(), EventListener.class).to(RabbitMQManager.class);
     }
     DynamicSet.bind(binder(), LifecycleListener.class).to(RabbitMQManager.class);
   }
