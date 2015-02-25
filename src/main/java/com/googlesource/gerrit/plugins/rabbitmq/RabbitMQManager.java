@@ -14,8 +14,8 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq;
 
-import com.google.gerrit.common.ChangeHooks;
-import com.google.gerrit.common.ChangeListener;
+import com.google.gerrit.common.EventListener;
+import com.google.gerrit.common.EventSource;
 import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.gerrit.reviewdb.client.Account;
 import com.google.gerrit.reviewdb.server.ReviewDb;
@@ -23,7 +23,7 @@ import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.PluginUser;
 import com.google.gerrit.server.account.AccountResolver;
-import com.google.gerrit.server.events.ChangeEvent;
+import com.google.gerrit.server.events.Event;
 import com.google.gerrit.server.git.WorkQueue;
 import com.google.gerrit.server.util.RequestContext;
 import com.google.gerrit.server.util.ThreadLocalRequestContext;
@@ -42,7 +42,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 @Singleton
-public class RabbitMQManager implements ChangeListener, LifecycleListener {
+public class RabbitMQManager implements EventListener, LifecycleListener {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(RabbitMQManager.class);
@@ -51,7 +51,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
   private final AMQPSession session;
   private final Gson gson = new Gson();
   private final Timer monitorTimer = new Timer();
-  private final ChangeHooks hooks;
+  private final EventSource source;
   private final AccountResolver accountResolver;
   private final IdentifiedUser.GenericFactory userFactory;
   private final WorkQueue workQueue;
@@ -64,7 +64,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
   @Inject
   public RabbitMQManager(Properties properties,
       AMQPSession session,
-      ChangeHooks hooks,
+      EventSource source,
       AccountResolver accountResolver,
       IdentifiedUser.GenericFactory userFactory,
       WorkQueue workQueue,
@@ -73,7 +73,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
       SchemaFactory<ReviewDb> schemaFactory) {
     this.properties = properties;
     this.session = session;
-    this.hooks = hooks;
+    this.source = source;
     this.accountResolver = accountResolver;
     this.userFactory = userFactory;
     this.workQueue = workQueue;
@@ -97,7 +97,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
 
     if (properties.hasListenAs()) {
       final String userName = properties.getListenAs();
-      final ChangeListener changeListener = this;
+      final EventListener eventListener = this;
       workQueue.getDefaultQueue().submit(new Runnable() {
         @Override
         public void run() {
@@ -134,7 +134,7 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
             }
 
             IdentifiedUser user = userFactory.create(userAccount.getId());
-            hooks.addChangeListener(changeListener, user);
+            source.addEventListener(eventListener, user);
             LOGGER.info("Listen events as : {}", userName);
           } catch (OrmException e) {
             LOGGER.error("Could not query database for listenAs", e);
@@ -155,11 +155,11 @@ public class RabbitMQManager implements ChangeListener, LifecycleListener {
   public void stop() {
     monitorTimer.cancel();
     session.disconnect();
-    hooks.removeChangeListener(this);
+    source.removeEventListener(this);
   }
 
   @Override
-  public void onChangeEvent(ChangeEvent event) {
+  public void onEvent(Event event) {
     session.publishMessage(gson.toJson(event));
   }
 
