@@ -11,14 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.googlesource.gerrit.plugins.rabbitmq.session;
 
-import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+package com.googlesource.gerrit.plugins.rabbitmq.config.section;
 
-public interface Session {
-//  public Properties getProperties();
-  public boolean isOpen();
-  public void connect();
-  public void disconnect();
-  public void publish(String message);
+import com.googlesource.gerrit.plugins.rabbitmq.annotation.Default;
+
+public class Message implements Section {
+
+  @Default("1")
+  public Integer deliveryMode;
+
+  @Default("0")
+  public Integer priority;
+
+  @Default
+  public String routingKey;
 }

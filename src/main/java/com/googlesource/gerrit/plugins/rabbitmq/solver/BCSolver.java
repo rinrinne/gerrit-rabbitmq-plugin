@@ -13,21 +13,18 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.rabbitmq.solver;
 
-import static com.googlesource.gerrit.plugins.rabbitmq.PropertiesStore.FILE_EXT;
-import static com.googlesource.gerrit.plugins.rabbitmq.PropertiesStore.SITE_DIR;
+import static com.googlesource.gerrit.plugins.rabbitmq.RabbitMQManager.FILE_EXT;
+import static com.googlesource.gerrit.plugins.rabbitmq.RabbitMQManager.SITE_DIR;
 
 import com.google.gerrit.extensions.annotations.PluginData;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 

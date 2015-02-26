@@ -17,21 +17,20 @@ package com.googlesource.gerrit.plugins.rabbitmq.session.impl;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import com.googlesource.gerrit.plugins.rabbitmq.Keys;
 import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.AMQP;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Exchange;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Message;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Monitor;
 import com.googlesource.gerrit.plugins.rabbitmq.session.Session;
-// import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-// import com.rabbitmq.client.DefaultConsumer;
-// import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
 
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,11 +55,6 @@ public final class AMQPSession implements Session, ShutdownListener {
   }
 
   @Override
-  public Properties getProperties() {
-    return properties;
-  }
-
-  @Override
   public boolean isOpen() {
     if (connection != null) {
       return true;
@@ -82,7 +76,7 @@ public final class AMQPSession implements Session, ShutdownListener {
         LOGGER.warn(MSG("Failed to open publish channel."));
         failureCount++;
       }
-      if (failureCount > properties.getConnectionMonitorInterval()) {
+      if (failureCount > properties.getSection(Monitor.class).failureCount) {
         LOGGER.warn("Connection has something wrong. So will be disconnected.");
         disconnect();
       }
@@ -96,23 +90,24 @@ public final class AMQPSession implements Session, ShutdownListener {
       LOGGER.info(MSG("Already connected."));
       return;
     }
-    LOGGER.info(MSG("Connect to {}..."), properties.getString(Keys.AMQP_URI));
+    AMQP amqp = properties.getSection(AMQP.class);
+    LOGGER.info(MSG("Connect to {}..."), amqp.uri);
     ConnectionFactory factory = new ConnectionFactory();
     try {
-      if (StringUtils.isNotEmpty(properties.getString(Keys.AMQP_URI))) {
-        factory.setUri(properties.getString(Keys.AMQP_URI));
-        if (StringUtils.isNotEmpty(properties.getString(Keys.AMQP_USERNAME))) {
-          factory.setUsername(properties.getString(Keys.AMQP_USERNAME));
+      if (StringUtils.isNotEmpty(amqp.uri)) {
+        factory.setUri(amqp.uri);
+        if (StringUtils.isNotEmpty(amqp.username)) {
+          factory.setUsername(amqp.username);
         }
-        if (StringUtils.isNotEmpty(properties.getString(Keys.AMQP_PASSWORD))) {
-          factory.setPassword(properties.getString(Keys.AMQP_PASSWORD));
+        if (StringUtils.isNotEmpty(amqp.password)) {
+          factory.setPassword(amqp.password);
         }
         connection = factory.newConnection();
         connection.addShutdownListener(this);
         LOGGER.info(MSG("Connection established."));
       }
     } catch (URISyntaxException ex) {
-      LOGGER.error(MSG("URI syntax error: {}"), properties.getString(Keys.AMQP_URI));
+      LOGGER.error(MSG("URI syntax error: {}"), amqp.uri);
     } catch (IOException ex) {
       LOGGER.error(MSG("Connection cannot be opened."));
     } catch (Exception ex) {
@@ -136,17 +131,18 @@ public final class AMQPSession implements Session, ShutdownListener {
   }
 
   @Override
-  public void publish(String message) {
+  public void publish(String messageBody) {
     if (channel == null || !channel.isOpen()) {
       channel = getChannel();
     }
     if (channel != null && channel.isOpen()) {
+      Message message = properties.getSection(Message.class);
+      Exchange exchange = properties.getSection(Exchange.class);
       try {
         LOGGER.debug(MSG("Send message."));
-        channel.basicPublish(properties.getString(Keys.EXCHANGE_NAME),
-            properties.getString(Keys.MESSAGE_ROUTINGKEY),
+        channel.basicPublish(exchange.name, message.routingKey,
             properties.getAMQProperties().getBasicProperties(),
-            message.getBytes(CharEncoding.UTF_8));
+            messageBody.getBytes(CharEncoding.UTF_8));
       } catch (Exception ex) {
         LOGGER.warn(MSG("Error when sending meessage."), ex);
       }

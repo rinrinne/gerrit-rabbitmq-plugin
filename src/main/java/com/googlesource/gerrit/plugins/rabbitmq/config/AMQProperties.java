@@ -14,13 +14,16 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq.config;
 
-import com.googlesource.gerrit.plugins.rabbitmq.Keys;
+import com.googlesource.gerrit.plugins.rabbitmq.annotation.MessageHeader;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Message;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Section;
 import com.rabbitmq.client.AMQP;
 
 import org.apache.commons.codec.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,29 +34,49 @@ public class AMQProperties {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQProperties.class);
 
-  private final Properties properties;
+  private final PluginProperties properties;
   private AMQP.BasicProperties amqpProperties;
 
-  public AMQProperties(Properties properties) {
+  public AMQProperties(PluginProperties properties) {
     this.properties = properties;
   }
 
   public AMQP.BasicProperties getBasicProperties() {
     if (amqpProperties == null) {
       Map<String, Object> headers = new HashMap<>();
-      headers.put(Keys.GERRIT_NAME.key, properties.getString(Keys.GERRIT_NAME));
-      headers.put(Keys.GERRIT_HOSTNAME.key, properties.getString(Keys.GERRIT_HOSTNAME));
-      headers.put(Keys.GERRIT_SCHEME.key, properties.getString(Keys.GERRIT_SCHEME));
-      headers.put(Keys.GERRIT_PORT.key, String.valueOf(properties.getInt(Keys.GERRIT_PORT)));
-      headers.put(Keys.GERRIT_FRONT_URL.key, properties.getGerritFrontUrl());
-      headers.put(Keys.GERRIT_VERSION.key, properties.getGerritVersion());
-
+      for (Section section : properties.getSections()) {
+        for (Field f : section.getClass().getFields()) {
+          if (f.isAnnotationPresent(MessageHeader.class)) {
+            MessageHeader mh = f.getAnnotation(MessageHeader.class);
+            try {
+              switch(f.getType().getSimpleName()) {
+                case "String":
+                  headers.put(mh.value(), f.get(section).toString());
+                  break;
+                case "Integer":
+                  headers.put(mh.value(), f.getInt(section));
+                  break;
+                case "Long":
+                  headers.put(mh.value(), f.getLong(section));
+                  break;
+                case "Boolean":
+                  headers.put(mh.value(), f.getBoolean(section));
+                  break;
+                default:
+                  break;
+              }
+            } catch (Exception ex) {
+            }
+          }
+        }
+      }
+      Message message = properties.getSection(Message.class);
       AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
       builder.appId(EVENT_APPID);
       builder.contentEncoding(CharEncoding.UTF_8);
       builder.contentType(CONTENT_TYPE_JSON);
-      builder.deliveryMode(properties.getInt(Keys.MESSAGE_DELIVERY_MODE));
-      builder.priority(properties.getInt(Keys.MESSAGE_PRIORITY));
+      builder.deliveryMode(message.deliveryMode);
+      builder.priority(message.priority);
       builder.headers(headers);
 
       amqpProperties = builder.build();

@@ -19,7 +19,17 @@ import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.name.Names;
 
+import com.googlesource.gerrit.plugins.rabbitmq.config.PluginProperties;
+import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+import com.googlesource.gerrit.plugins.rabbitmq.config.PropertiesFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.AMQP;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Exchange;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Gerrit;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Message;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Monitor;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Section;
 import com.googlesource.gerrit.plugins.rabbitmq.message.DefaultChangeListener;
 import com.googlesource.gerrit.plugins.rabbitmq.message.IdentifiedChangeListener;
 import com.googlesource.gerrit.plugins.rabbitmq.message.MessagePublisher;
@@ -36,14 +46,21 @@ class Module extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(PropertiesStore.class);
+    bind(Gerrit.class);
     bind(BCSolver.class);
     bind(IdentifiedChangeListener.class);
     bind(RabbitMQManager.class);
 
+    bind(Section.class).annotatedWith(Names.named("amqp")).to(AMQP.class);
+    bind(Section.class).annotatedWith(Names.named("exchange")).to(Exchange.class);
+    bind(Section.class).annotatedWith(Names.named("gerrit")).to(Gerrit.class);
+    bind(Section.class).annotatedWith(Names.named("message")).to(Message.class);
+    bind(Section.class).annotatedWith(Names.named("monitor")).to(Monitor.class);
+
     install(new FactoryModuleBuilder().implement(Solver.class, BCSolver.class).build(SolverFactory.class));
     install(new FactoryModuleBuilder().implement(Session.class, AMQPSession.class).build(SessionFactory.class));
     install(new FactoryModuleBuilder().implement(Publisher.class, MessagePublisher.class).build(PublisherFactory.class));
+    install(new FactoryModuleBuilder().implement(Properties.class, PluginProperties.class).build(PropertiesFactory.class));
 
     DynamicSet.bind(binder(), LifecycleListener.class).to(RabbitMQManager.class);
     DynamicSet.bind(binder(), LifecycleListener.class).to(DefaultChangeListener.class);

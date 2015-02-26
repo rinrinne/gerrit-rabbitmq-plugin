@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Monitor;
 import com.googlesource.gerrit.plugins.rabbitmq.session.Session;
 import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactory;
 
@@ -37,6 +38,7 @@ public class MessagePublisher implements Publisher, LifecycleListener {
   private final static int MONITOR_FIRSTTIME_DELAY = 15000;
 
   private final Session session;
+  private final Properties properties;
   private final Gson gson;
   private final Timer monitorTimer = new Timer();
   private boolean available = true;
@@ -47,6 +49,7 @@ public class MessagePublisher implements Publisher, LifecycleListener {
       SessionFactory sessionFactory,
       Gson gson) {
     this.session = sessionFactory.create(properties);
+    this.properties = properties;
     this.gson = gson;
   }
 
@@ -62,7 +65,7 @@ public class MessagePublisher implements Publisher, LifecycleListener {
             session.connect();
           }
         }
-      }, MONITOR_FIRSTTIME_DELAY, session.getProperties().getConnectionMonitorInterval());
+      }, MONITOR_FIRSTTIME_DELAY, properties.getSection(Monitor.class).interval);
       available = true;
     }
   }
@@ -102,7 +105,12 @@ public class MessagePublisher implements Publisher, LifecycleListener {
   }
 
   @Override
+  public Properties getProperties() {
+    return properties;
+  }
+
+  @Override
   public String getName() {
-    return session.getProperties().getName();
+    return properties.getName();
   }
 }

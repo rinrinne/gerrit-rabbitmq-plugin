@@ -14,25 +14,32 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq;
 
+import com.google.gerrit.extensions.annotations.PluginData;
+import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
+import com.googlesource.gerrit.plugins.rabbitmq.config.PropertiesFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Gerrit;
+import com.googlesource.gerrit.plugins.rabbitmq.config.section.Section;
 import com.googlesource.gerrit.plugins.rabbitmq.message.DefaultChangeListener;
 import com.googlesource.gerrit.plugins.rabbitmq.message.IdentifiedChangeListener;
-import com.googlesource.gerrit.plugins.rabbitmq.message.MessagePublisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.PublisherFactory;
-import com.googlesource.gerrit.plugins.rabbitmq.session.Session;
-import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactory;
-import com.googlesource.gerrit.plugins.rabbitmq.solver.BCSolver;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverFactory;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,24 +47,34 @@ import java.util.List;
 public class RabbitMQManager implements LifecycleListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQManager.class);
+
+  public static final String FILE_EXT = ".config";
+  public static final String SITE_DIR = "site";
+
+  private final String pluginName;
+  private final Path pluginDataDir;
   private final DefaultChangeListener defaultChangeListener;
   private final IdentifiedChangeListener identifiedChangeListener;
   private final PublisherFactory publisherFactory;
-  private final PropertiesStore propertiesStore;
+  private final PropertiesFactory propFactory;
   private final SolverFactory solverFactory;
   private final List<Publisher> publisherList = new ArrayList<>();
 
   @Inject
   public RabbitMQManager(
-      DefaultChangeListener defaultChangeListener,
-      IdentifiedChangeListener identifiedChangeListener,
-      PublisherFactory publisherFactory,
-      PropertiesStore propertiesStore,
-      SolverFactory solverFactory) {
+      @PluginName final String pluginName,
+      @PluginData final File pluginData,
+      final DefaultChangeListener defaultChangeListener,
+      final IdentifiedChangeListener identifiedChangeListener,
+      final PublisherFactory publisherFactory,
+      final PropertiesFactory propFactory,
+      final SolverFactory solverFactory) {
+    this.pluginName = pluginName;
+    this.pluginDataDir = pluginData.toPath();
     this.defaultChangeListener = defaultChangeListener;
     this.identifiedChangeListener = identifiedChangeListener;
     this.publisherFactory = publisherFactory;
-    this.propertiesStore = propertiesStore;
+    this.propFactory = propFactory;
     this.solverFactory = solverFactory;
   }
 
@@ -66,12 +83,13 @@ public class RabbitMQManager implements LifecycleListener {
     Solver solver = solverFactory.create();
     solver.solve();
 
-    propertiesStore.load();
-    for (Properties properties : propertiesStore) {
+    List<Properties> propList = load();
+    for (Properties properties : propList) {
       Publisher publisher = publisherFactory.create(properties);
       publisher.start();
-      if (properties.hasListenAs()) {
-        identifiedChangeListener.addPublisher(publisher, properties.getListenAs());
+      String listenAs = properties.getSection(Gerrit.class).listenAs;
+      if (!listenAs.isEmpty()) {
+        identifiedChangeListener.addPublisher(publisher, listenAs);
       } else {
         defaultChangeListener.addPublisher(publisher);
       }
@@ -83,12 +101,33 @@ public class RabbitMQManager implements LifecycleListener {
   public void stop() {
     for (Publisher publisher : publisherList) {
       publisher.stop();
-      if (publisher.getSession().getProperties().hasListenAs()) {
+      String listenAs = publisher.getProperties().getSection(Gerrit.class).listenAs;
+      if (!listenAs.isEmpty()) {
         identifiedChangeListener.removePublisher(publisher);
       } else {
         defaultChangeListener.removePublisher(publisher);
       }
     }
     publisherList.clear();
+  }
+
+  private List<Properties> load() {
+    List<Properties> propList = new ArrayList<>();
+    // Load base
+    Properties base = propFactory.create(pluginDataDir.resolve(pluginName + FILE_EXT));
+    base.load();
+
+    // Load site
+    try (DirectoryStream<Path> ds = Files.newDirectoryStream(pluginDataDir.resolve(SITE_DIR), "*" + FILE_EXT)) {
+      for (Path configFile : ds) {
+        Properties site = propFactory.create(configFile);
+        if (site.load(base)) {
+          propList.add(site);
+        }
+      }
+    } catch (IOException iex) {
+      LOGGER.warn(iex.getMessage());
+    }
+    return propList;
   }
 }
