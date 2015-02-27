@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googlesource.gerrit.plugins.rabbitmq.message;
+package com.googlesource.gerrit.plugins.rabbitmq.worker;
 
 import com.google.gerrit.common.ChangeHooks;
-import com.google.gerrit.common.ChangeListener;
 import com.google.gerrit.reviewdb.client.Account;
 import com.google.gerrit.reviewdb.server.ReviewDb;
 import com.google.gerrit.server.CurrentUser;
@@ -31,12 +30,14 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 
+import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IdentifiedChangeListener {
+public class UserChangeWorker implements ChangeWorker {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(IdentifiedChangeListener.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(UserChangeWorker.class);
 
   private final ChangeHooks hooks;
   private final WorkQueue workQueue;
@@ -47,7 +48,7 @@ public class IdentifiedChangeListener {
   private final SchemaFactory<ReviewDb> schemaFactory;
 
   @Inject
-  public IdentifiedChangeListener(
+  public UserChangeWorker(
       ChangeHooks hooks,
       WorkQueue workQueue,
       AccountResolver accountResolver,
@@ -64,6 +65,12 @@ public class IdentifiedChangeListener {
     this.schemaFactory = schemaFactory;
   }
 
+  @Override
+  public void addPublisher(final Publisher publisher) {
+    LOGGER.warn("addPublisher() without username was called. Hence no operation.");
+  }
+
+  @Override
   public void addPublisher(final Publisher publisher, final String userName) {
     workQueue.getDefaultQueue().submit(new Runnable() {
       private ReviewDb db;
@@ -120,7 +127,13 @@ public class IdentifiedChangeListener {
     });
   }
 
-  public void removePublisher(Publisher publisher) {
+  @Override
+  public void removePublisher(final Publisher publisher) {
     hooks.removeChangeListener(publisher);
+  }
+
+  @Override
+  public void clear() {
+    // no op.
   }
 }

@@ -23,15 +23,14 @@ import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
 import com.googlesource.gerrit.plugins.rabbitmq.config.PropertiesFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.config.section.Gerrit;
-import com.googlesource.gerrit.plugins.rabbitmq.config.section.Section;
-import com.googlesource.gerrit.plugins.rabbitmq.message.DefaultChangeListener;
-import com.googlesource.gerrit.plugins.rabbitmq.message.IdentifiedChangeListener;
 import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.PublisherFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorker;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorkerFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.DefaultChangeWorker;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +52,8 @@ public class RabbitMQManager implements LifecycleListener {
 
   private final String pluginName;
   private final Path pluginDataDir;
-  private final DefaultChangeListener defaultChangeListener;
-  private final IdentifiedChangeListener identifiedChangeListener;
+  private final ChangeWorker defaultChangeWorker;
+  private final ChangeWorker userChangeWorker;
   private final PublisherFactory publisherFactory;
   private final PropertiesFactory propFactory;
   private final SolverFactory solverFactory;
@@ -64,15 +63,15 @@ public class RabbitMQManager implements LifecycleListener {
   public RabbitMQManager(
       @PluginName final String pluginName,
       @PluginData final File pluginData,
-      final DefaultChangeListener defaultChangeListener,
-      final IdentifiedChangeListener identifiedChangeListener,
+      final DefaultChangeWorker defaultChangeWorker,
+      final ChangeWorkerFactory changeWorkerFactory,
       final PublisherFactory publisherFactory,
       final PropertiesFactory propFactory,
       final SolverFactory solverFactory) {
     this.pluginName = pluginName;
     this.pluginDataDir = pluginData.toPath();
-    this.defaultChangeListener = defaultChangeListener;
-    this.identifiedChangeListener = identifiedChangeListener;
+    this.defaultChangeWorker = defaultChangeWorker;
+    this.userChangeWorker = changeWorkerFactory.create();
     this.publisherFactory = publisherFactory;
     this.propFactory = propFactory;
     this.solverFactory = solverFactory;
@@ -89,9 +88,9 @@ public class RabbitMQManager implements LifecycleListener {
       publisher.start();
       String listenAs = properties.getSection(Gerrit.class).listenAs;
       if (!listenAs.isEmpty()) {
-        identifiedChangeListener.addPublisher(publisher, listenAs);
+        userChangeWorker.addPublisher(publisher, listenAs);
       } else {
-        defaultChangeListener.addPublisher(publisher);
+        defaultChangeWorker.addPublisher(publisher);
       }
       publisherList.add(publisher);
     }
@@ -103,9 +102,9 @@ public class RabbitMQManager implements LifecycleListener {
       publisher.stop();
       String listenAs = publisher.getProperties().getSection(Gerrit.class).listenAs;
       if (!listenAs.isEmpty()) {
-        identifiedChangeListener.removePublisher(publisher);
+        userChangeWorker.removePublisher(publisher);
       } else {
-        defaultChangeListener.removePublisher(publisher);
+        defaultChangeWorker.removePublisher(publisher);
       }
     }
     publisherList.clear();

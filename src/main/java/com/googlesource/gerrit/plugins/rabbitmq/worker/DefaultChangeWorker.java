@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googlesource.gerrit.plugins.rabbitmq.message;
+package com.googlesource.gerrit.plugins.rabbitmq.worker;
 
 import com.google.gerrit.common.ChangeListener;
-import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.gerrit.server.events.ChangeEvent;
 import com.google.inject.Singleton;
+
+import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,38 +27,30 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Singleton
-public class DefaultChangeListener implements ChangeListener, LifecycleListener {
+public class DefaultChangeWorker implements ChangeListener, ChangeWorker {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChangeListener.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChangeWorker.class);
 
   private final Set<Publisher> publishers = new CopyOnWriteArraySet<>();
 
+  @Override
   public void addPublisher(Publisher publisher) {
     publishers.add(publisher);
   }
 
+  @Override
+  public void addPublisher(Publisher publisher, String userName) {
+    LOGGER.warn("addPublisher() with username '{}' was called. Hence no operation.", userName);
+  }
+
+  @Override
   public void removePublisher(Publisher publisher) {
     publishers.remove(publisher);
   }
 
+  @Override
   public void clear() {
     publishers.clear();
-  }
-
-  @Override
-  public void start() {
-    LOGGER.info("Start default listener.");
-    for (Publisher publisher : publishers) {
-      publisher.start();
-    }
-  }
-
-  @Override
-  public void stop() {
-    LOGGER.info("Stop default listener.");
-    for (Publisher publisher : publishers) {
-      publisher.stop();
-    }
   }
 
   @Override

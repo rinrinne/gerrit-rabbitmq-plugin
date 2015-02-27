@@ -11,11 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.googlesource.gerrit.plugins.rabbitmq.session;
 
-public interface Session {
-  public boolean isOpen();
-  public void connect();
-  public void disconnect();
-  public void publish(String message);
+package com.googlesource.gerrit.plugins.rabbitmq.worker;
+
+public interface ChangeWorkerFactory {
+  public ChangeWorker create();
 }

@@ -30,8 +30,6 @@ import com.googlesource.gerrit.plugins.rabbitmq.config.section.Gerrit;
 import com.googlesource.gerrit.plugins.rabbitmq.config.section.Message;
 import com.googlesource.gerrit.plugins.rabbitmq.config.section.Monitor;
 import com.googlesource.gerrit.plugins.rabbitmq.config.section.Section;
-import com.googlesource.gerrit.plugins.rabbitmq.message.DefaultChangeListener;
-import com.googlesource.gerrit.plugins.rabbitmq.message.IdentifiedChangeListener;
 import com.googlesource.gerrit.plugins.rabbitmq.message.MessagePublisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.PublisherFactory;
@@ -41,16 +39,15 @@ import com.googlesource.gerrit.plugins.rabbitmq.session.impl.AMQPSession;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverImpl;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorker;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorkerFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.DefaultChangeWorker;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.UserChangeWorker;
 
 class Module extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(Gerrit.class);
-    bind(SolverImpl.class);
-    bind(IdentifiedChangeListener.class);
-    bind(RabbitMQManager.class);
-
     bind(Section.class).annotatedWith(Names.named("amqp")).to(AMQP.class);
     bind(Section.class).annotatedWith(Names.named("exchange")).to(Exchange.class);
     bind(Section.class).annotatedWith(Names.named("gerrit")).to(Gerrit.class);
@@ -61,9 +58,9 @@ class Module extends AbstractModule {
     install(new FactoryModuleBuilder().implement(Session.class, AMQPSession.class).build(SessionFactory.class));
     install(new FactoryModuleBuilder().implement(Publisher.class, MessagePublisher.class).build(PublisherFactory.class));
     install(new FactoryModuleBuilder().implement(Properties.class, PluginProperties.class).build(PropertiesFactory.class));
+    install(new FactoryModuleBuilder().implement(ChangeWorker.class, UserChangeWorker.class).build(ChangeWorkerFactory.class));
 
     DynamicSet.bind(binder(), LifecycleListener.class).to(RabbitMQManager.class);
-    DynamicSet.bind(binder(), LifecycleListener.class).to(DefaultChangeListener.class);
-    DynamicSet.bind(binder(), ChangeListener.class).to(DefaultChangeListener.class);
+    DynamicSet.bind(binder(), ChangeListener.class).to(DefaultChangeWorker.class);
   }
 }
