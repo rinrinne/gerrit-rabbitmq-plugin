@@ -46,6 +46,7 @@ shadowJar {
   }
   dependencies {
     include(dependency('com.rabbitmq:amqp-client'))
+    include(dependency('com.google.inject.extensions:guice-multibindings'))
   }
 }
 
@@ -65,6 +66,7 @@ repositories {
 dependencies {
   compile(
     [group: 'com.google.gerrit', name: "gerrit-${apiType}-api", version: apiVersion],
+    [group: 'com.google.inject.extensions', name: 'guice-multibindings', version: '4.0-beta5'],
     [group: 'com.google.code.gson', name: 'gson', version: '2.1'],
     [group: 'commons-lang', name: 'commons-lang', version: '2.5'],
     [group: 'commons-codec', name: 'commons-codec', version: '1.4'],
