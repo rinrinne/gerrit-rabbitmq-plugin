@@ -122,6 +122,7 @@ public class PluginProperties implements Properties {
       } else {
         Sections.fromConfig(section, cfg);
       }
+      Sections.normalize(section);
     }
     return true;
   }

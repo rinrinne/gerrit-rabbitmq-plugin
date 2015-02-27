@@ -104,24 +104,36 @@ public final class Sections {
                 f.set(section, new Boolean(config.getBoolean(getName(section), null, f.getName(), false)));
               }
             }
-            if (f.getType() == Integer.class && f.isAnnotationPresent(Limit.class)) {
-              Object obj = f.get(section);
-              if (obj != null) {
-                Integer val = Integer.class.cast(obj);
-                Limit a = f.getAnnotation(Limit.class);
-                if (a.min() != -1 && val < a.min()) {
-                  val = a.min();
-                }
-                if (a.max() != -1 && val > a.max()) {
-                  val = a.max();
-                }
-                f.set(section, val);
-              }
-            }
           } catch (Exception ex) {
             LOGGER.warn("Exception during fromConfig: {}", f.getName());
           }
         }
+      }
+    }
+    return section;
+  }
+
+  public static final <T extends Section> T normalize(T section) {
+    Field[] fs = section.getClass().getFields();
+    for (Field f : fs) {
+      try {
+        if (f.getType() == Integer.class && f.isAnnotationPresent(Limit.class)) {
+          Object obj = f.get(section);
+          if (obj != null) {
+            Integer val = Integer.class.cast(obj);
+            Limit a = f.getAnnotation(Limit.class);
+            if (a.min() != -1 && val < a.min()) {
+              val = a.min();
+            }
+            if (a.max() != -1 && val > a.max()) {
+              val = a.max();
+            }
+            f.set(section, val);
+          }
+        }
+      } catch (Exception ex) {
+        LOGGER.warn("Exception during normalize: {}", f.getName());
+        LOGGER.info("{}", ex.getMessage());
       }
     }
     return section;
