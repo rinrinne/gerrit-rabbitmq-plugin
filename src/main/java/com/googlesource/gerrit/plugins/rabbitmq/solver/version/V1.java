@@ -10,16 +10,15 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
-// limitations under the License.
-package com.googlesource.gerrit.plugins.rabbitmq.solver;
+package com.googlesource.gerrit.plugins.rabbitmq.solver.version;
 
 import static com.googlesource.gerrit.plugins.rabbitmq.RabbitMQManager.FILE_EXT;
 import static com.googlesource.gerrit.plugins.rabbitmq.RabbitMQManager.SITE_DIR;
 
-import com.google.gerrit.extensions.annotations.PluginData;
-import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
+
+import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,19 +27,19 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class BCSolver implements Solver {
+public class V1 implements Solver {
 
   private final static String DEFAULT_SITE_NAME = "default";
-  private static final Logger LOGGER = LoggerFactory.getLogger(BCSolver.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(V1.class);
 
   private final String pluginName;
   private final Path pluginDataDir;
   private final Path etcDir;
 
   @Inject
-  public BCSolver(
-      @PluginName final String pluginName,
-      @PluginData final File pluginData,
+  public V1(
+      final String pluginName,
+      final File pluginData,
       final SitePaths sites
       ) {
     this.pluginName = pluginName;
