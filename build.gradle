@@ -7,14 +7,14 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.github.jengelman.gradle.plugins:shadow:0.8'
+    classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.1'
   }
 }
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'shadow'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -35,15 +35,17 @@ jar {
       'Implementation-Version' : version,
       'Created-By': 'rinrinne (rinrin.ne@gmail.com)'
     )
-  } 
+  }
 }
 
-shadow {
+shadowJar {
   classifier = apiVersion
-  exclude 'META-INF/*.DSA'
-  exclude 'META-INF/*.RSA'
-  artifactSet {
-    include 'com.rabbitmq'
+  mergeServiceFiles {
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+  }
+  dependencies {
+    include(dependency('com.rabbitmq:amqp-client'))
   }
 }
 
