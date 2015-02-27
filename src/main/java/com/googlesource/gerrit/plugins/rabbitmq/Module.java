@@ -19,7 +19,7 @@ import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.google.inject.name.Names;
+import com.google.inject.multibindings.Multibinder;
 
 import com.googlesource.gerrit.plugins.rabbitmq.config.PluginProperties;
 import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
@@ -48,11 +48,12 @@ class Module extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(Section.class).annotatedWith(Names.named("amqp")).to(AMQP.class);
-    bind(Section.class).annotatedWith(Names.named("exchange")).to(Exchange.class);
-    bind(Section.class).annotatedWith(Names.named("gerrit")).to(Gerrit.class);
-    bind(Section.class).annotatedWith(Names.named("message")).to(Message.class);
-    bind(Section.class).annotatedWith(Names.named("monitor")).to(Monitor.class);
+    Multibinder<Section> sectionBinder = Multibinder.newSetBinder(binder(), Section.class);
+    sectionBinder.addBinding().to(AMQP.class);
+    sectionBinder.addBinding().to(Exchange.class);
+    sectionBinder.addBinding().to(Gerrit.class);
+    sectionBinder.addBinding().to(Message.class);
+    sectionBinder.addBinding().to(Monitor.class);
 
     install(new FactoryModuleBuilder().implement(Solver.class, SolverImpl.class).build(SolverFactory.class));
     install(new FactoryModuleBuilder().implement(Session.class, AMQPSession.class).build(SessionFactory.class));

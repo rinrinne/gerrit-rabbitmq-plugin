@@ -16,7 +16,6 @@ package com.googlesource.gerrit.plugins.rabbitmq.config;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.google.inject.name.Named;
 
 import com.googlesource.gerrit.plugins.rabbitmq.config.section.Gerrit;
 import com.googlesource.gerrit.plugins.rabbitmq.config.section.Monitor;
@@ -34,10 +33,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 public class PluginProperties implements Properties {
 
@@ -45,35 +42,18 @@ public class PluginProperties implements Properties {
 
   private final static int MINIMUM_CONNECTION_MONITOR_INTERVAL = 5000;
 
-  private final List<Section> sections = new ArrayList<>();
+  private final Set<Section> sections;
   private final Path propertiesFile;
   private AMQProperties amqProperties;
 
   @AssistedInject
-  public PluginProperties(
-      @Named("amqp") final Section amqp,
-      @Named("exchange") final Section exchange,
-      @Named("gerrit") final Section gerrit,
-      @Named("message") final Section message,
-      @Named("monitor") final Section monitor) {
-    this(amqp, exchange, gerrit, message, monitor, null);
+  public PluginProperties(Set<Section> sections) {
+    this(sections, null);
   }
 
   @AssistedInject
-  public PluginProperties(
-      @Named("amqp") final Section amqp,
-      @Named("exchange") final Section exchange,
-      @Named("gerrit") final Section gerrit,
-      @Named("message") final Section message,
-      @Named("monitor") final Section monitor,
-      @Assisted Path propertiesFile) {
-    this.sections.addAll(Arrays.asList(
-        amqp,
-        exchange,
-        gerrit,
-        message,
-        monitor
-    ));
+  public PluginProperties(Set<Section> sections, @Assisted Path propertiesFile) {
+    this.sections = sections;
     this.propertiesFile = propertiesFile;
   }
 
@@ -141,8 +121,8 @@ public class PluginProperties implements Properties {
   }
 
   @Override
-  public List<Section> getSections() {
-    return Collections.unmodifiableList(sections);
+  public Set<Section> getSections() {
+    return Collections.unmodifiableSet(sections);
   }
 
   @Override
