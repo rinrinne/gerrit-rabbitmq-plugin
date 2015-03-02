@@ -71,9 +71,9 @@ public final class AMQPSession implements Session, ShutdownListener {
         ch = connection.createChannel();
         ch.addShutdownListener(this);
         failureCount = 0;
-        LOGGER.info(MSG("Publish channel opened."));
+        LOGGER.info(MSG("Channel #{} opened."), ch.getChannelNumber());
       } catch (Exception ex) {
-        LOGGER.warn(MSG("Failed to open publish channel."));
+        LOGGER.warn(MSG("Failed to open channel."));
         failureCount++;
       }
       if (failureCount > properties.getSection(Monitor.class).failureCount) {
@@ -120,18 +120,24 @@ public final class AMQPSession implements Session, ShutdownListener {
     LOGGER.info(MSG("Disconnecting..."));
     try {
       if (channel != null) {
+        LOGGER.info(MSG("Close Channel #{}..."), channel.getChannelNumber());
         channel.close();
       }
     } catch (Exception ex) {
       LOGGER.warn(MSG("Error when close channel.") , ex);
+    } finally {
+      channel = null;
     }
 
     try {
       if (connection != null) {
+        LOGGER.info(MSG("Close Connection..."));
         connection.close();
       }
     } catch (Exception ex) {
       LOGGER.warn(MSG("Error when close connection.") , ex);
+    } finally {
+      connection = null;
     }
   }
 
@@ -156,19 +162,20 @@ public final class AMQPSession implements Session, ShutdownListener {
 
   @Override
   public void shutdownCompleted(ShutdownSignalException exception) {
-    Object obj = exception.getReference();
-
-    if (obj instanceof Channel) {
-      Channel ch = (Channel) obj;
-      if (ch.equals(channel)) {
-        LOGGER.info(MSG("Publish channel closed."));
-        channel = null;
-      }
-    } else if (obj instanceof Connection) {
-      Connection conn = (Connection) obj;
-      if (conn.equals(connection)) {
-        LOGGER.info(MSG("Connection disconnected."));
+    if (exception.isHardError()) {
+      if (exception.isInitiatedByApplication()) {
+        LOGGER.info(MSG("Connection closed."));
+      } else {
+        LOGGER.info(MSG("Connection suddenly closed."));
         connection = null;
+      }
+    } else {
+      Channel ch = (Channel) exception.getReference();
+      if (exception.isInitiatedByApplication()) {
+        LOGGER.info(MSG("Channel #{} closed."), ch.getChannelNumber());
+      } else {
+        LOGGER.info(MSG("Channel #{} suddenly closed."), ch.getChannelNumber());
+        channel = null;
       }
     }
   }
