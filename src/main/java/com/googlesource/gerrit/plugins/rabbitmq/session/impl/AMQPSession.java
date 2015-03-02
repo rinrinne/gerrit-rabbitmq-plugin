@@ -119,14 +119,19 @@ public final class AMQPSession implements Session, ShutdownListener {
   public void disconnect() {
     LOGGER.info(MSG("Disconnecting..."));
     try {
+      if (channel != null) {
+        channel.close();
+      }
+    } catch (Exception ex) {
+      LOGGER.warn(MSG("Error when close channel.") , ex);
+    }
+
+    try {
       if (connection != null) {
         connection.close();
       }
     } catch (Exception ex) {
       LOGGER.warn(MSG("Error when close connection.") , ex);
-    } finally {
-      connection = null;
-      channel = null;
     }
   }
 
@@ -160,8 +165,11 @@ public final class AMQPSession implements Session, ShutdownListener {
         channel = null;
       }
     } else if (obj instanceof Connection) {
-      LOGGER.info(MSG("Connection disconnected."));
-      connection = null;
+      Connection conn = (Connection) obj;
+      if (conn.equals(connection)) {
+        LOGGER.info(MSG("Connection disconnected."));
+        connection = null;
+      }
     }
   }
 }
