@@ -20,9 +20,6 @@ import com.google.inject.Inject;
 
 import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,7 +27,6 @@ import java.nio.file.Path;
 public class V1 implements Solver {
 
   private final static String DEFAULT_SITE_NAME = "default";
-  private static final Logger LOGGER = LoggerFactory.getLogger(V1.class);
 
   private final String pluginName;
   private final Path pluginDataDir;

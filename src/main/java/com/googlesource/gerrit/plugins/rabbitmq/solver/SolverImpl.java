@@ -20,14 +20,9 @@ import com.google.inject.Inject;
 
 import com.googlesource.gerrit.plugins.rabbitmq.solver.version.V1;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 
 public class SolverImpl implements Solver {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(SolverImpl.class);
 
   private final Solver solver;
 
