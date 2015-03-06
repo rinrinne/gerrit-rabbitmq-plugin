@@ -27,6 +27,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.ShutdownListener;
+import com.rabbitmq.client.ShutdownNotifier;
 import com.rabbitmq.client.ShutdownSignalException;
 
 import org.apache.commons.codec.CharEncoding;
@@ -37,13 +38,60 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public final class AMQPSession implements Session, ShutdownListener {
+public final class AMQPSession implements Session {
+
+  private class ShutdownListenerImpl implements ShutdownListener {
+
+    private final Class<?> clazz;
+
+    public <T extends ShutdownNotifier> ShutdownListenerImpl(Class<T> clazz) {
+      this.clazz = clazz;
+    }
+
+    @Override
+    public void shutdownCompleted(ShutdownSignalException cause) {
+      if (cause != null) {
+        Object obj = cause.getReference();
+        if (Channel.class.isInstance(obj)) {
+          Channel.class.cast(obj).removeShutdownListener(this);
+        } else if (Connection.class.isInstance(obj)) {
+          Connection.class.cast(obj).removeShutdownListener(this);
+        }
+        if (clazz.isInstance(obj)) {
+          if (clazz == Channel.class) {
+            Channel ch = Channel.class.cast(obj);
+            if (cause.isInitiatedByApplication()) {
+              LOGGER.info(MSG("Channel #{} closed."), ch.getChannelNumber());
+            } else {
+              LOGGER.info(MSG("Channel #{} suddenly closed."), ch.getChannelNumber());
+            }
+            if (ch.equals(AMQPSession.this.channel)) {
+              AMQPSession.this.channel = null;
+            }
+          } else if (clazz == Connection.class) {
+            Connection conn = Connection.class.cast(obj);
+            if (cause.isInitiatedByApplication()) {
+              LOGGER.info(MSG("Connection closed."));
+            } else {
+              LOGGER.info(MSG("Connection suddenly closed."));
+            }
+            if (conn.equals(AMQPSession.this.connection)) {
+              AMQPSession.this.connection = null;
+            }
+          }
+        }
+      }
+    }
+  }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AMQPSession.class);
   private final Properties properties;
   private volatile Connection connection;
   private volatile Channel channel;
   private volatile int failureCount = 0;
+
+  private final ShutdownListener connectionListener = new ShutdownListenerImpl(Connection.class);
+  private final ShutdownListener channelListener = new ShutdownListenerImpl(Channel.class);
 
   @Inject
   public AMQPSession(@Assisted Properties properties) {
@@ -69,7 +117,7 @@ public final class AMQPSession implements Session, ShutdownListener {
     } else {
       try {
         ch = connection.createChannel();
-        ch.addShutdownListener(this);
+        ch.addShutdownListener(channelListener);
         failureCount = 0;
         LOGGER.info(MSG("Channel #{} opened."), ch.getChannelNumber());
       } catch (Exception ex) {
@@ -103,7 +151,7 @@ public final class AMQPSession implements Session, ShutdownListener {
           factory.setPassword(amqp.password);
         }
         connection = factory.newConnection();
-        connection.addShutdownListener(this);
+        connection.addShutdownListener(connectionListener);
         LOGGER.info(MSG("Connection established."));
       }
     } catch (URISyntaxException ex) {
@@ -156,26 +204,6 @@ public final class AMQPSession implements Session, ShutdownListener {
             messageBody.getBytes(CharEncoding.UTF_8));
       } catch (Exception ex) {
         LOGGER.warn(MSG("Error when sending meessage."), ex);
-      }
-    }
-  }
-
-  @Override
-  public void shutdownCompleted(ShutdownSignalException exception) {
-    if (exception.isHardError()) {
-      if (exception.isInitiatedByApplication()) {
-        LOGGER.info(MSG("Connection closed."));
-      } else {
-        LOGGER.info(MSG("Connection suddenly closed."));
-        connection = null;
-      }
-    } else {
-      Channel ch = (Channel) exception.getReference();
-      if (exception.isInitiatedByApplication()) {
-        LOGGER.info(MSG("Channel #{} closed."), ch.getChannelNumber());
-      } else {
-        LOGGER.info(MSG("Channel #{} suddenly closed."), ch.getChannelNumber());
-        channel = null;
       }
     }
   }
