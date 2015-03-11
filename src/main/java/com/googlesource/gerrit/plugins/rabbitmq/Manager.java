@@ -43,9 +43,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class RabbitMQManager implements LifecycleListener {
+public class Manager implements LifecycleListener {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQManager.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Manager.class);
 
   public static final String FILE_EXT = ".config";
   public static final String SITE_DIR = "site";
@@ -60,7 +60,7 @@ public class RabbitMQManager implements LifecycleListener {
   private final List<Publisher> publisherList = new ArrayList<>();
 
   @Inject
-  public RabbitMQManager(
+  public Manager(
       @PluginName final String pluginName,
       @PluginData final File pluginData,
       final DefaultChangeWorker defaultChangeWorker,

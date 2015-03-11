@@ -61,7 +61,7 @@ class Module extends AbstractModule {
     install(new FactoryModuleBuilder().implement(Properties.class, PluginProperties.class).build(PropertiesFactory.class));
     install(new FactoryModuleBuilder().implement(ChangeWorker.class, UserChangeWorker.class).build(ChangeWorkerFactory.class));
 
-    DynamicSet.bind(binder(), LifecycleListener.class).to(RabbitMQManager.class);
+    DynamicSet.bind(binder(), LifecycleListener.class).to(Manager.class);
     DynamicSet.bind(binder(), ChangeListener.class).to(DefaultChangeWorker.class);
   }
 }

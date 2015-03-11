@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 package com.googlesource.gerrit.plugins.rabbitmq.solver.version;
 
-import static com.googlesource.gerrit.plugins.rabbitmq.RabbitMQManager.FILE_EXT;
-import static com.googlesource.gerrit.plugins.rabbitmq.RabbitMQManager.SITE_DIR;
+import static com.googlesource.gerrit.plugins.rabbitmq.Manager.FILE_EXT;
+import static com.googlesource.gerrit.plugins.rabbitmq.Manager.SITE_DIR;
 
 import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
