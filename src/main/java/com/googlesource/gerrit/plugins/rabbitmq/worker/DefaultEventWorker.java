@@ -27,9 +27,9 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Singleton
-public class DefaultChangeWorker implements ChangeListener, ChangeWorker {
+public class DefaultEventWorker implements ChangeListener, EventWorker {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChangeWorker.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEventWorker.class);
 
   private final Set<Publisher> publishers = new CopyOnWriteArraySet<>();
 

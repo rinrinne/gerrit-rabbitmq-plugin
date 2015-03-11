@@ -35,9 +35,9 @@ import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserChangeWorker implements ChangeWorker {
+public class UserEventWorker implements EventWorker {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UserChangeWorker.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(UserEventWorker.class);
 
   private final ChangeHooks hooks;
   private final WorkQueue workQueue;
@@ -48,7 +48,7 @@ public class UserChangeWorker implements ChangeWorker {
   private final SchemaFactory<ReviewDb> schemaFactory;
 
   @Inject
-  public UserChangeWorker(
+  public UserEventWorker(
       ChangeHooks hooks,
       WorkQueue workQueue,
       AccountResolver accountResolver,

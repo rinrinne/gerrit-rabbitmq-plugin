@@ -14,6 +14,6 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq.worker;
 
-public interface ChangeWorkerFactory {
-  public ChangeWorker create();
+public interface EventWorkerFactory {
+  public EventWorker create();
 }

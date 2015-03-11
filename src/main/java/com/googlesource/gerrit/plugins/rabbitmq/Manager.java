@@ -26,9 +26,9 @@ import com.googlesource.gerrit.plugins.rabbitmq.config.section.Gerrit;
 import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.PublisherFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
-import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorker;
-import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorkerFactory;
-import com.googlesource.gerrit.plugins.rabbitmq.worker.DefaultChangeWorker;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.EventWorker;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.EventWorkerFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.DefaultEventWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +52,8 @@ public class Manager implements LifecycleListener {
 
   private final String pluginName;
   private final Path pluginDataDir;
-  private final ChangeWorker defaultChangeWorker;
-  private final ChangeWorker userChangeWorker;
+  private final EventWorker defaultEventWorker;
+  private final EventWorker userEventWorker;
   private final PublisherFactory publisherFactory;
   private final PropertiesFactory propFactory;
   private final Set<Solver> solvers;
@@ -63,15 +63,15 @@ public class Manager implements LifecycleListener {
   public Manager(
       @PluginName final String pluginName,
       @PluginData final File pluginData,
-      final DefaultChangeWorker defaultChangeWorker,
-      final ChangeWorkerFactory changeWorkerFactory,
+      final DefaultEventWorker defaultEventWorker,
+      final EventWorkerFactory eventWorkerFactory,
       final PublisherFactory publisherFactory,
       final PropertiesFactory propFactory,
       final Set<Solver> solvers) {
     this.pluginName = pluginName;
     this.pluginDataDir = pluginData.toPath();
-    this.defaultChangeWorker = defaultChangeWorker;
-    this.userChangeWorker = changeWorkerFactory.create();
+    this.defaultEventWorker = defaultEventWorker;
+    this.userEventWorker = eventWorkerFactory.create();
     this.publisherFactory = publisherFactory;
     this.propFactory = propFactory;
     this.solvers = solvers;
@@ -89,9 +89,9 @@ public class Manager implements LifecycleListener {
       publisher.start();
       String listenAs = properties.getSection(Gerrit.class).listenAs;
       if (!listenAs.isEmpty()) {
-        userChangeWorker.addPublisher(publisher, listenAs);
+        userEventWorker.addPublisher(publisher, listenAs);
       } else {
-        defaultChangeWorker.addPublisher(publisher);
+        defaultEventWorker.addPublisher(publisher);
       }
       publisherList.add(publisher);
     }
@@ -103,9 +103,9 @@ public class Manager implements LifecycleListener {
       publisher.stop();
       String listenAs = publisher.getProperties().getSection(Gerrit.class).listenAs;
       if (!listenAs.isEmpty()) {
-        userChangeWorker.removePublisher(publisher);
+        userEventWorker.removePublisher(publisher);
       } else {
-        defaultChangeWorker.removePublisher(publisher);
+        defaultEventWorker.removePublisher(publisher);
       }
     }
     publisherList.clear();

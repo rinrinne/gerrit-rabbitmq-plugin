@@ -37,10 +37,10 @@ import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactoryProvider;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.version.V1;
-import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorker;
-import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorkerFactory;
-import com.googlesource.gerrit.plugins.rabbitmq.worker.DefaultChangeWorker;
-import com.googlesource.gerrit.plugins.rabbitmq.worker.UserChangeWorker;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.EventWorker;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.EventWorkerFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.DefaultEventWorker;
+import com.googlesource.gerrit.plugins.rabbitmq.worker.UserEventWorker;
 
 class Module extends AbstractModule {
 
@@ -60,9 +60,9 @@ class Module extends AbstractModule {
 
     install(new FactoryModuleBuilder().implement(Publisher.class, MessagePublisher.class).build(PublisherFactory.class));
     install(new FactoryModuleBuilder().implement(Properties.class, PluginProperties.class).build(PropertiesFactory.class));
-    install(new FactoryModuleBuilder().implement(ChangeWorker.class, UserChangeWorker.class).build(ChangeWorkerFactory.class));
+    install(new FactoryModuleBuilder().implement(EventWorker.class, UserEventWorker.class).build(EventWorkerFactory.class));
 
     DynamicSet.bind(binder(), LifecycleListener.class).to(Manager.class);
-    DynamicSet.bind(binder(), ChangeListener.class).to(DefaultChangeWorker.class);
+    DynamicSet.bind(binder(), ChangeListener.class).to(DefaultEventWorker.class);
   }
 }
