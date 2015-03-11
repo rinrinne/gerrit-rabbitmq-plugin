@@ -35,9 +35,8 @@ import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.PublisherFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactoryProvider;
-import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverImpl;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
-import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.solver.version.V1;
 import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorker;
 import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorkerFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.worker.DefaultChangeWorker;
@@ -56,7 +55,9 @@ class Module extends AbstractModule {
     sectionBinder.addBinding().to(Message.class);
     sectionBinder.addBinding().to(Monitor.class);
 
-    install(new FactoryModuleBuilder().implement(Solver.class, SolverImpl.class).build(SolverFactory.class));
+    Multibinder<Solver> solverBinder = Multibinder.newSetBinder(binder(), Solver.class);
+    solverBinder.addBinding().to(V1.class);
+
     install(new FactoryModuleBuilder().implement(Publisher.class, MessagePublisher.class).build(PublisherFactory.class));
     install(new FactoryModuleBuilder().implement(Properties.class, PluginProperties.class).build(PropertiesFactory.class));
     install(new FactoryModuleBuilder().implement(ChangeWorker.class, UserChangeWorker.class).build(ChangeWorkerFactory.class));

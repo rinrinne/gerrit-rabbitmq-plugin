@@ -15,6 +15,8 @@ package com.googlesource.gerrit.plugins.rabbitmq.solver.version;
 import static com.googlesource.gerrit.plugins.rabbitmq.Manager.FILE_EXT;
 import static com.googlesource.gerrit.plugins.rabbitmq.Manager.SITE_DIR;
 
+import com.google.gerrit.extensions.annotations.PluginData;
+import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
 
@@ -38,8 +40,8 @@ public class V1 implements Solver {
 
   @Inject
   public V1(
-      final String pluginName,
-      final File pluginData,
+      @PluginName final String pluginName,
+      @PluginData final File pluginData,
       final SitePaths sites
       ) {
     this.pluginName = pluginName;

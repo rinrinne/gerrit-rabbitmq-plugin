@@ -26,7 +26,6 @@ import com.googlesource.gerrit.plugins.rabbitmq.config.section.Gerrit;
 import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.PublisherFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
-import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorker;
 import com.googlesource.gerrit.plugins.rabbitmq.worker.ChangeWorkerFactory;
 import com.googlesource.gerrit.plugins.rabbitmq.worker.DefaultChangeWorker;
@@ -41,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Singleton
 public class Manager implements LifecycleListener {
@@ -56,7 +56,7 @@ public class Manager implements LifecycleListener {
   private final ChangeWorker userChangeWorker;
   private final PublisherFactory publisherFactory;
   private final PropertiesFactory propFactory;
-  private final SolverFactory solverFactory;
+  private final Set<Solver> solvers;
   private final List<Publisher> publisherList = new ArrayList<>();
 
   @Inject
@@ -67,20 +67,21 @@ public class Manager implements LifecycleListener {
       final ChangeWorkerFactory changeWorkerFactory,
       final PublisherFactory publisherFactory,
       final PropertiesFactory propFactory,
-      final SolverFactory solverFactory) {
+      final Set<Solver> solvers) {
     this.pluginName = pluginName;
     this.pluginDataDir = pluginData.toPath();
     this.defaultChangeWorker = defaultChangeWorker;
     this.userChangeWorker = changeWorkerFactory.create();
     this.publisherFactory = publisherFactory;
     this.propFactory = propFactory;
-    this.solverFactory = solverFactory;
+    this.solvers = solvers;
   }
 
   @Override
   public void start() {
-    Solver solver = solverFactory.create();
-    solver.solve();
+    for (Solver solver : solvers) {
+      solver.solve();
+    }
 
     List<Properties> propList = load();
     for (Properties properties : propList) {
