@@ -14,9 +14,6 @@
 
 package com.googlesource.gerrit.plugins.rabbitmq.session.type;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
 import com.googlesource.gerrit.plugins.rabbitmq.config.section.AMQP;
 import com.googlesource.gerrit.plugins.rabbitmq.config.section.Exchange;
@@ -93,7 +90,6 @@ public final class AMQPSession implements Session {
   private final ShutdownListener connectionListener = new ShutdownListenerImpl(Connection.class);
   private final ShutdownListener channelListener = new ShutdownListenerImpl(Channel.class);
 
-  @Inject
   public AMQPSession(Properties properties) {
     this.properties = properties;
   }
