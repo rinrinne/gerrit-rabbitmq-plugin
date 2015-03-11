@@ -65,6 +65,7 @@ public class V1 implements Solver {
       Files.move(oldFile, newFile);
       Files.createFile(siteDir.resolve(DEFAULT_SITE_NAME + FILE_EXT));
     } catch (Exception ex) {
+      LOGGER.info(ex.getMessage());
     }
   }
 }

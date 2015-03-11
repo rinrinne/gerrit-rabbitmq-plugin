@@ -66,6 +66,7 @@ public class AMQProperties {
                   break;
               }
             } catch (Exception ex) {
+              LOGGER.info(ex.getMessage());
             }
           }
         }
