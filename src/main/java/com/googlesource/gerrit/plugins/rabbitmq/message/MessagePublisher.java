@@ -24,6 +24,7 @@ import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
 import com.googlesource.gerrit.plugins.rabbitmq.config.section.Monitor;
 import com.googlesource.gerrit.plugins.rabbitmq.session.Session;
 import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactory;
+import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactoryProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +47,9 @@ public class MessagePublisher implements Publisher, LifecycleListener {
   @Inject
   public MessagePublisher(
       @Assisted Properties properties,
-      SessionFactory sessionFactory,
+      SessionFactoryProvider sessionFactoryProvider,
       Gson gson) {
-    this.session = sessionFactory.create(properties);
+    this.session = sessionFactoryProvider.get().create(properties);
     this.properties = properties;
     this.gson = gson;
   }

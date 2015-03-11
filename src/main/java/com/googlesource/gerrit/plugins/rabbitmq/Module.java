@@ -33,9 +33,8 @@ import com.googlesource.gerrit.plugins.rabbitmq.config.section.Section;
 import com.googlesource.gerrit.plugins.rabbitmq.message.MessagePublisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.Publisher;
 import com.googlesource.gerrit.plugins.rabbitmq.message.PublisherFactory;
-import com.googlesource.gerrit.plugins.rabbitmq.session.Session;
 import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactory;
-import com.googlesource.gerrit.plugins.rabbitmq.session.impl.AMQPSession;
+import com.googlesource.gerrit.plugins.rabbitmq.session.SessionFactoryProvider;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverImpl;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.Solver;
 import com.googlesource.gerrit.plugins.rabbitmq.solver.SolverFactory;
@@ -48,6 +47,8 @@ class Module extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(SessionFactory.class).toProvider(SessionFactoryProvider.class);
+
     Multibinder<Section> sectionBinder = Multibinder.newSetBinder(binder(), Section.class);
     sectionBinder.addBinding().to(AMQP.class);
     sectionBinder.addBinding().to(Exchange.class);
@@ -56,7 +57,6 @@ class Module extends AbstractModule {
     sectionBinder.addBinding().to(Monitor.class);
 
     install(new FactoryModuleBuilder().implement(Solver.class, SolverImpl.class).build(SolverFactory.class));
-    install(new FactoryModuleBuilder().implement(Session.class, AMQPSession.class).build(SessionFactory.class));
     install(new FactoryModuleBuilder().implement(Publisher.class, MessagePublisher.class).build(PublisherFactory.class));
     install(new FactoryModuleBuilder().implement(Properties.class, PluginProperties.class).build(PropertiesFactory.class));
     install(new FactoryModuleBuilder().implement(ChangeWorker.class, UserChangeWorker.class).build(ChangeWorkerFactory.class));

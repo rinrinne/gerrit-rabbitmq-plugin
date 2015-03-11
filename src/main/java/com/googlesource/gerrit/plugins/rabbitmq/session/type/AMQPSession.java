@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googlesource.gerrit.plugins.rabbitmq.session.impl;
+package com.googlesource.gerrit.plugins.rabbitmq.session.type;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -94,7 +94,7 @@ public final class AMQPSession implements Session {
   private final ShutdownListener channelListener = new ShutdownListenerImpl(Channel.class);
 
   @Inject
-  public AMQPSession(@Assisted Properties properties) {
+  public AMQPSession(Properties properties) {
     this.properties = properties;
   }
 

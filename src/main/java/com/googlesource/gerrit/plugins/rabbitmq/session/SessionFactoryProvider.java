@@ -13,11 +13,12 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.rabbitmq.session;
 
-import com.googlesource.gerrit.plugins.rabbitmq.config.Properties;
-import com.googlesource.gerrit.plugins.rabbitmq.session.type.AMQPSession;
+import com.google.inject.Provider;
 
-public class SessionFactory {
-  public Session create(Properties properties) {
-    return new AMQPSession(properties);
+public class SessionFactoryProvider implements Provider<SessionFactory> {
+
+  @Override
+  public SessionFactory get() {
+    return new SessionFactory();
   }
 }
