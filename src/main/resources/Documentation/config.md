@@ -1,7 +1,20 @@
 RabbitMQ Configuration
 ======================
 
-Some parameters can be configured in the plugin config file `rabbitmq.config`.
+Some parameters can be configured using config file.
+
+Directory
+---------------------
+
+You can locate config files to `$site_path/data/rabbitmq/site`.
+File extension must be `.config`.
+Connection to RabbitMQ will be established for each files.
+
+If `rabbitmq.config` exists in `$site_path/data/rabbitmq`, it is loaded at first.
+It means that this is default for all config files.
+
+File format
+---------------------
 
 ```
   [amqp]
@@ -79,7 +92,7 @@ Some parameters can be configured in the plugin config file `rabbitmq.config`.
 Default Values
 -----------------
 
-You can change the below values by specifying them in `rabbitmq.config`.
+You can change the below values by specifying them in config file.
 
 **Bold** is String value.
 

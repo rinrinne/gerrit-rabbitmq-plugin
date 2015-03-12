@@ -65,6 +65,17 @@ Minimum Configuration
 History
 ---------------------
 
+* 2.0
+  * The feature that configure queue/exchange/bind has been removed.
+    Means messages are published to existing exhange only.
+  * Allow event filter based on an existing user (Thanks @GLundh!)
+  * Fix singletonize Properties class and fix typo (Thanks @hugares!)
+  * Add API support: 2.9-2.10
+  * Bumped default Gerrit API to 2.10
+  * Bumped amqp-client to 3.4.4
+  * Bumped Gradle to 2.3
+  * Remove Buck support
+
 * 1.4
   * Binary release
   * Add gradle support
