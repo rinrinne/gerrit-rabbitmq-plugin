@@ -65,6 +65,13 @@ Minimum Configuration
 History
 ---------------------
 
+* 3.0
+  * New feature: multi url support
+  * Bump amqp-client to 3.5.0
+  * Bump Gradle shadow plugin to 1.2.1
+  * Add Gradle release plugin 2.0.2
+  * Fix & improve connection handling
+
 * 2.0
   * The feature that configure queue/exchange/bind has been removed.
     Means messages are published to existing exhange only.
