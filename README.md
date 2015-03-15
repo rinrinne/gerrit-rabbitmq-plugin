@@ -15,7 +15,7 @@ This is Gerrit plugin.
 This can publish gerrit events to message queue provided by RabbitMQ.
 Published events are the same as Gerrit stream evnets.
 
-This plugin works on Gerrit 2.8 or later.
+This plugin works on Gerrit 2.8 - 2.10.
 
 Environments
 ---------------------
@@ -34,7 +34,7 @@ To build plugin with gradle.
 Using another version API
 --------------------------
 
-Now avaliable for Gerrit 2.8.5 only. If you want to use it on another version of Gerrit, please try the below.
+Now avaliable for Gerrit 2.10 only. If you want to use it on another version of Gerrit, please try the below.
 
     ./gradlew build -PapiVersion=2.8
 
@@ -64,6 +64,9 @@ Minimum Configuration
 
 History
 ---------------------
+
+* 3.1
+  * Fix README
 
 * 3.0
   * New feature: multi url support
