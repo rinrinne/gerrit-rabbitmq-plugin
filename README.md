@@ -65,6 +65,10 @@ Minimum Configuration
 History
 ---------------------
 
+* 3.14 (Freezed)
+  * New branch: `stable-2.10`
+  * HEAD in `master` is permanently latest but would not be updated by author anymore.
+
 * 3.1
   * Fix README
 
